@@ -4,6 +4,24 @@
 
 面向 Codex、Claude Code、OpenCode、Pi 与自定义 Agent 的自托管 `web_search`、`web_fetch` 服务。项目封装固定版本的 Camofox Browser REST API，不维护上游 Fork，同时提供带认证的 REST 和无状态 Streamable HTTP MCP。
 
+## 项目特色
+
+- **所有 Agent 共用一个服务：** Codex、Claude Code、OpenCode、Pi、LangChain 或任意 MCP/REST 客户端都能连接同一个 endpoint。
+- **浏览器驱动的搜索与抓取：** 通过 Camofox 渲染 JavaScript 页面，不依赖商业搜索 API Key，同时保持浏览器实现固定版本且可替换。
+- **多 Provider 自动容错：** DuckDuckGo、Brave、Bing、Google 可插拔、可排序；Provider 被拦截后进入冷却，并自动切换到下一个。
+- **默认安全：** 只开放只读工具，强制 Bearer 认证，出站流量经过带 SSRF 防护的隔离代理，并明确将网页内容标记为不可信输入。
+- **部署与接入完整交付：** 同时提供固定版本 Docker Compose、多架构 GHCR 镜像、类型安全 REST 客户端、OpenAPI、Agent 安装器、Pi 插件和可运行示例。
+- **可观测、易自动化：** 类型化错误、健康检查、Prometheus metrics、无状态 MCP、统一包版本和真实 Docker E2E 都属于正式支持路径。
+
+## v0.0.3 更新内容
+
+- 优化微信公众号文章抓取：针对短暂验证中间页以及空白或只有 iframe 的 snapshot 执行有界就绪等待。
+- 持续存在交互验证时返回 HTTP 503、`Retry-After` 和可重试的类型化 `fetch_blocked` 错误。
+- 从返回的最终 URL 中移除微信临时 `poc_token`，同时保留最终 URL 的 SSRF 校验。
+- 增加可配置的抓取就绪超时、结构化日志、Prometheus metrics、双语指引和真实微信 Docker E2E。
+
+查看完整的 [v0.0.3 Release Notes](https://github.com/idefav/web-search/releases/tag/v0.0.3)或[全部版本](https://github.com/idefav/web-search/releases)。
+
 ## 架构
 
 ```text

@@ -6,6 +6,23 @@ Camofox Web Search 是一个可自托管、只读的 `web_search` 与 `web_fetch
 
 > GitHub Pages 只托管这份文档。真实服务需要部署在支持 Docker Compose 的 Linux 主机上。
 
+## 项目特色
+
+<div class="release-grid">
+<article><h3>一个 Agent endpoint</h3><p>Codex、Claude Code、OpenCode、Pi、LangChain 和自定义 MCP/REST 客户端共用一个认证服务。</p></article>
+<article><h3>搜索自动容错</h3><p>四个可插拔 Provider、顺序回退、冷却熔断，以及 Google 单并发保护。</p></article>
+<article><h3>浏览器驱动抓取</h3><p>Camofox 可渲染 JavaScript 页面，并对短暂页面占位执行有界就绪重试。</p></article>
+<article><h3>只读安全边界</h3><p>Bearer 认证、SSRF 出站防护、不可信内容边界，不提供浏览器交互或登录工具。</p></article>
+<article><h3>完整交付链路</h3><p>Docker Compose、多架构 GHCR、OpenAPI、TypeScript 客户端、CLI 安装器和 Pi 插件。</p></article>
+<article><h3>生产可观测</h3><p>类型化错误、健康检查、Prometheus metrics、结构化日志、CI 和真实 Docker E2E。</p></article>
+</div>
+
+## 最新版本：v{{version}}
+
+0.0.3 优化了微信公众号文章抓取；持续存在验证页时会返回可重试的 `fetch_blocked`；最终 URL 会移除临时 `poc_token`；同时增加了就绪等待 telemetry 和真实微信 Docker E2E。
+
+[查看 Release Notes](/zh-CN/releases/)或打开 [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.3)。
+
 ## 从这里开始
 
 1. 按照[服务端部署指南](/zh-CN/deployment/)创建固定版本的部署。

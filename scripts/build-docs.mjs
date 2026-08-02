@@ -17,7 +17,8 @@ const languages = {
     alternateCode: "zh-CN",
     project: "Overview",
     deployment: "Server deployment",
-    examples: "Examples"
+    examples: "Examples",
+    releases: "Releases"
   },
   "zh-CN": {
     label: "简体中文",
@@ -25,14 +26,16 @@ const languages = {
     alternateCode: "en",
     project: "项目概览",
     deployment: "服务端部署",
-    examples: "示例"
+    examples: "示例",
+    releases: "版本记录"
   }
 };
 
 const pages = [
   { slug: "", file: "index.md", title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
   { slug: "deployment", file: "deployment.md", title: { en: "Server deployment", "zh-CN": "服务端部署" } },
-  { slug: "examples", file: "examples.md", title: { en: "Examples", "zh-CN": "示例" } }
+  { slug: "examples", file: "examples.md", title: { en: "Examples", "zh-CN": "示例" } },
+  { slug: "releases", file: "releases.md", title: { en: "Release notes", "zh-CN": "版本记录" } }
 ];
 
 function pageUrl(language, slug, current) {
@@ -43,7 +46,7 @@ function pageUrl(language, slug, current) {
 function navigation(language, current) {
   const labels = languages[language];
   const links = pages.map((page) => {
-    const label = page.slug === "deployment" ? labels.deployment : page.slug === "examples" ? labels.examples : labels.project;
+    const label = page.slug === "deployment" ? labels.deployment : page.slug === "examples" ? labels.examples : page.slug === "releases" ? labels.releases : labels.project;
     const active = page.slug === current ? " aria-current=\"page\"" : "";
     return `<a href="${pageUrl(language, page.slug, current)}"${active}>${label}</a>`;
   }).join("");

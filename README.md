@@ -4,6 +4,24 @@
 
 A self-hosted, remote-first `web_search` and `web_fetch` service for Codex, Claude Code, OpenCode, Pi, and custom Agents. It wraps the pinned Camofox Browser REST API without maintaining a fork and exposes authenticated REST plus stateless Streamable HTTP MCP.
 
+## Why Camofox Web Search
+
+- **One service for every Agent:** connect Codex, Claude Code, OpenCode, Pi, LangChain, or any MCP/REST client to the same endpoint.
+- **Browser-backed search and fetch:** render JavaScript pages through Camofox instead of relying on a search API key, while keeping the browser implementation pinned and replaceable.
+- **Resilient multi-provider search:** DuckDuckGo, Brave, Bing, and Google are pluggable and ordered; blocked providers enter cooldown and automatically fall through to the next provider.
+- **Safer by design:** only read-only tools are exposed, Bearer authentication is mandatory, outbound traffic is isolated behind an SSRF-filtering proxy, and web content is explicitly marked untrusted.
+- **Deployment and integration included:** version-pinned Docker Compose, multi-architecture GHCR images, typed REST client, OpenAPI contract, Agent installer, Pi plugin, and runnable examples ship together.
+- **Observable and automation-friendly:** structured errors, health checks, Prometheus metrics, stateless MCP, deterministic package versions, and real Docker E2E are part of the supported path.
+
+## What's new in v0.0.3
+
+- Improved WeChat Official Account article fetching with a bounded readiness wait for transient verification interstitials and empty or iframe-only snapshots.
+- Added typed, retryable `fetch_blocked` responses with HTTP 503 and `Retry-After` when interactive verification persists.
+- Removed temporary WeChat `poc_token` values from returned final URLs while retaining final-URL SSRF validation.
+- Added configurable fetch readiness timeout, structured readiness logs, Prometheus metrics, bilingual guidance, and real WeChat Docker E2E coverage.
+
+Read the complete [v0.0.3 release notes](https://github.com/idefav/web-search/releases/tag/v0.0.3) or browse [all releases](https://github.com/idefav/web-search/releases).
+
 ## Architecture
 
 ```text
