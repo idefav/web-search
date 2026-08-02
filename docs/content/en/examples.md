@@ -11,6 +11,12 @@ The custom Python Agent demonstrates both supported integration styles:
 
 Both modes use the same research system prompt and treat every title, snippet, and fetched page as untrusted data.
 
+### LangChain Deep Agents demo
+
+<div class="asciinema-demo" data-asciinema-src="../../assets/deepagents-demo.cast" aria-label="Interactive terminal recording of LangChain Deep Agents using Camofox Web Search"></div>
+
+The recording demonstrates MCP tool discovery, streaming Agent and subagent steps, `web_search` calls, `web_fetch` calls, and the final cited answer. [Download the original `.cast` recording](../../assets/deepagents-demo.cast) for local playback with `asciinema play`, or [open the uploaded recording on asciinema.org](https://asciinema.org/a/1262198).
+
 ```bash
 cd examples/deepagents
 cp .env.example .env

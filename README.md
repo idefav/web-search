@@ -97,6 +97,12 @@ All returned web text is untrusted input. Tool descriptions and output delimiter
 
 ## Examples
 
+### LangChain Deep Agents demo
+
+[![Watch the LangChain Deep Agents integration demo](./docs/assets/deepagents-demo.svg)](https://idefav.github.io/web-search/en/examples/#langchain-deep-agents-demo)
+
+The recording shows the custom LangChain Deep Agents example discovering and calling this project's `web_search` and `web_fetch` MCP tools with streaming step output. [Open the interactive player](https://idefav.github.io/web-search/en/examples/#langchain-deep-agents-demo) or [download `demo.cast`](./examples/deepagents/demo.cast) for local playback with `asciinema play`.
+
 - [`examples/deepagents`](./examples/deepagents): runnable Python 3.11+ custom research Agent using MCP or REST tools, with standard LangChain models or a custom OpenAI-compatible provider.
 - [`examples/agent-configs`](./examples/agent-configs): exact Codex, Claude Code, OpenCode, and Pi manual configuration examples.
 

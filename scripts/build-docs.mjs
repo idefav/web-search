@@ -94,6 +94,9 @@ await writeFile(join(output, "index.html"), rootPage);
 await cp(join(source, "styles.css"), join(output, "styles.css"));
 await cp(join(source, "app.js"), join(output, "app.js"));
 await cp(join(source, "assets"), join(output, "assets"), { recursive: true });
+await cp(join(root, "examples", "deepagents", "demo.cast"), join(output, "assets", "deepagents-demo.cast"));
+await cp(join(root, "node_modules", "asciinema-player", "dist", "bundle", "asciinema-player.css"), join(output, "assets", "asciinema-player.css"));
+await cp(join(root, "node_modules", "asciinema-player", "dist", "bundle", "asciinema-player.min.js"), join(output, "assets", "asciinema-player.min.js"));
 await writeFile(join(output, ".nojekyll"), "");
 
 process.stdout.write(`Built bilingual documentation for v${version} in ${output}\n`);

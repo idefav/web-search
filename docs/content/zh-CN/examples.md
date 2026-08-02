@@ -11,6 +11,12 @@
 
 两种模式使用相同的研究提示词，并将标题、摘要和抓取页面全部视为不可信数据。
 
+### LangChain Deep Agents 演示
+
+<div class="asciinema-demo" data-asciinema-src="../../assets/deepagents-demo.cast" aria-label="LangChain Deep Agents 使用 Camofox Web Search 的交互式终端录屏"></div>
+
+录屏展示 MCP 工具发现、主 Agent 与子 Agent 的流式步骤、`web_search`、`web_fetch` 调用，以及最终带来源的回答。可以[下载原始 `.cast` 录屏](../../assets/deepagents-demo.cast)并使用 `asciinema play` 在本地播放，或[在 asciinema.org 打开已上传的录屏](https://asciinema.org/a/1262198)。
+
 ```bash
 cd examples/deepagents
 cp .env.example .env

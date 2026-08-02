@@ -55,4 +55,13 @@ for (const button of document.querySelectorAll("[data-copy]")) {
   });
 }
 
+for (const container of document.querySelectorAll("[data-asciinema-src]")) {
+  if (!window.AsciinemaPlayer) continue;
+  window.AsciinemaPlayer.create(container.dataset.asciinemaSrc, container, {
+    fit: "width",
+    idleTimeLimit: 2,
+    preload: true
+  });
+}
+
 renderCommands();

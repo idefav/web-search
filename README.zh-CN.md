@@ -97,6 +97,12 @@ Search 支持 `query`、`count`、`freshness`、`include_domains`、`exclude_dom
 
 ## 示例
 
+### LangChain Deep Agents 演示
+
+[![观看 LangChain Deep Agents 接入演示](./docs/assets/deepagents-demo.svg)](https://idefav.github.io/web-search/zh-CN/examples/#langchain-deep-agents-demo)
+
+录屏展示了 LangChain Deep Agents 自定义示例如何发现并调用本项目的 `web_search`、`web_fetch` MCP 工具，以及流式输出执行步骤。[打开交互播放器](https://idefav.github.io/web-search/zh-CN/examples/#langchain-deep-agents-demo)，或[下载 `demo.cast`](./examples/deepagents/demo.cast)后使用 `asciinema play` 在本地播放。
+
 - [`examples/deepagents`](./examples/deepagents)：可运行的 Python 3.11+ Deep Agents 自定义研究 Agent，支持 MCP/REST 工具、标准 LangChain 模型和自定义 OpenAI-compatible Provider。
 - [`examples/agent-configs`](./examples/agent-configs)：Codex、Claude Code、OpenCode 和 Pi 的准确手工配置。
 

@@ -31,6 +31,7 @@ for (const path of htmlFiles) {
 for (const required of [
   "examples/deepagents/README.md",
   "examples/deepagents/agent.py",
+  "examples/deepagents/demo.cast",
   "examples/deepagents/model_provider.py",
   "examples/agent-configs/codex.toml",
   "examples/agent-configs/claude.json",
