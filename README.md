@@ -111,7 +111,9 @@ Prepare and publish a release with:
 ```bash
 npm run release:version -- 0.2.0
 npm run release:verify
-git add . && git commit -m "release: v0.2.0" && git push
+git add . && git commit -m "release: v0.2.0"
+git tag -a v0.2.0 -m "v0.2.0"
+git push origin main v0.2.0
 gh release create v0.2.0 --target main --generate-notes --verify-tag
 ```
 
