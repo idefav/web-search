@@ -10,7 +10,8 @@ const packages = await Promise.all(packageFiles.map(async (path) => ({ path, dat
 const versions = new Set(packages.map(({ data }) => data.version));
 if (versions.size !== 1) throw new Error(`Publishable package versions differ: ${[...versions].join(", ")}`);
 const version = packages[0].data.version;
-const expected = (process.env.RELEASE_VERSION ?? process.env.GITHUB_REF_NAME ?? "").replace(/^v/, "");
+const expectedRef = process.env.GITHUB_REF_TYPE === "tag" ? process.env.GITHUB_REF_NAME : "";
+const expected = (process.env.RELEASE_VERSION ?? expectedRef ?? "").replace(/^v/, "");
 if (expected && expected !== version) throw new Error(`Release ${expected} does not match package version ${version}`);
 
 for (const { path, data } of packages) {
