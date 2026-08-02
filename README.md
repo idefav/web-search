@@ -97,15 +97,25 @@ For Pi, the installer runs `pi install npm:camofox-web-search-pi`. Before the fi
 
 ## GitHub delivery
 
-The repository includes five workflows:
+The repository includes four workflows:
 
 - `CI`: typecheck, tests, npm audit, package dry-runs, shell validation, Compose validation, and gateway image build.
 - `GitHub Pages`: publishes `docs/` after changes reach `main`.
-- `Publish GHCR image`: publishes multi-architecture, SBOM-enabled images for `v*` tags.
-- `Publish npm packages`: publishes `camofox-web-search-core`, `camofox-web-search-client`, `camofox-web-search`, and `camofox-web-search-pi` in dependency order after a GitHub Release.
+- `Release`: after a GitHub Release is published, validates its tag, publishes a multi-architecture GHCR image with SBOM/provenance, and publishes the four npm packages in dependency order. Prereleases use the npm `next` tag and never replace the container `latest` tag.
 - `Docker E2E`: runs the real pinned Camofox, Squid, and gateway stack weekly and on demand.
 
-Before the first npm release, authenticate locally with `npm login`, or configure npm Trusted Publishing for the `npm` GitHub environment. A legacy `NPM_TOKEN` environment secret is also accepted by the workflow. All four package versions and internal dependency versions must match the release tag; `npm run release:verify` enforces this.
+Before the first npm release, authenticate locally with `npm login`, or add an npm automation token as the `NPM_TOKEN` secret in the GitHub `npm` environment. After each package exists on npm, Trusted Publishing can replace the token: configure repository `idefav/web-search`, workflow `release.yml`, and environment `npm` in each package's npm settings. The workflow has the required OIDC permission.
+
+Prepare and publish a release with:
+
+```bash
+npm run release:version -- 0.2.0
+npm run release:verify
+git add . && git commit -m "release: v0.2.0" && git push
+gh release create v0.2.0 --target main --generate-notes --verify-tag
+```
+
+All workspace versions and internal dependency versions must match the Release tag. Publishing is idempotent: rerunning a partially failed Release skips npm package versions that already exist.
 
 Enable GitHub Pages with **Source: GitHub Actions** after pushing the repository. The page generates deployment and Agent installation commands from the repository owner/name entered by the visitor.
 

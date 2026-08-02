@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b --pretty false",
+    "release:version": "node scripts/set-version.mjs",
     "release:verify": "node scripts/verify-release.mjs",
     "e2e:docker": "scripts/docker-e2e.sh"
   },

@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 
 const packageFiles = [
+  "package.json",
+  "apps/server/package.json",
   "packages/core/package.json",
   "packages/client/package.json",
   "packages/cli/package.json",
@@ -15,7 +17,7 @@ const expected = (process.env.RELEASE_VERSION ?? expectedRef ?? "").replace(/^v/
 if (expected && expected !== version) throw new Error(`Release ${expected} does not match package version ${version}`);
 
 for (const { path, data } of packages) {
-  for (const dependency of ["camofox-web-search-core", "camofox-web-search-client"]) {
+  for (const dependency of ["camofox-web-search-core", "camofox-web-search-client", "camofox-web-search", "camofox-web-search-pi", "camofox-web-search-server"]) {
     if (data.dependencies?.[dependency] && data.dependencies[dependency] !== version) {
       throw new Error(`${path} must depend on ${dependency}@${version}`);
     }
