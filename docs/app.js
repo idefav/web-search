@@ -26,7 +26,7 @@ function renderCommands() {
   const owner = ownerInput.value.trim() || "idefav";
   const repo = repoInput.value.trim() || "web-search";
   const domain = domainInput?.value.trim() ?? "";
-  const version = versionInput?.value.trim() || document.body.dataset.releaseVersion || "0.0.2";
+  const version = versionInput?.value.trim() || document.body.dataset.releaseVersion || "0.0.3";
   const endpoint = domain ? `https://${domain}` : "http://127.0.0.1:8080";
   const deploymentEnvironment = domain ? `WEB_SEARCH_DOMAIN=${JSON.stringify(domain)} ` : "";
   deployCommand.textContent = [

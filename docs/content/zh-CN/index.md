@@ -39,3 +39,5 @@ camofox-web-search doctor codex --endpoint https://search.example.com --scope us
 搜索结果和抓取页面始终是不可信输入。工具输出会加入安全边界，但调用方仍需保留自己的 Prompt Injection 防护策略。
 
 默认搜索顺序为 `duckduckgo → brave → bing → google`。被拦截的 Provider 会进入冷却并被自动跳过，Google 还会单独限制为一个并发请求。Provider 顺序和冷却时间都在服务端配置，因此 Agent 配置无需变化。
+
+Fetch 遇到空白或只有 iframe 的页面时会执行一次有界的就绪重试，让微信公众号的临时验证中间页有机会自动完成；持续存在的验证会返回明确的 `fetch_blocked`，不会把占位内容交给 Agent。

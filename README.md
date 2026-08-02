@@ -25,7 +25,7 @@ Only the two high-level, read-only tools are exposed. Browser clicking, typing, 
 The supported production path is Docker Compose on a 64-bit Linux host with Docker Engine, Compose v2, Git, and OpenSSL. Use the same version for the source tag and GHCR image:
 
 ```bash
-VERSION="0.0.2"
+VERSION="0.0.3"
 git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
 cd web-search
 WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
@@ -44,6 +44,8 @@ Bootstrap creates `.env` with mode `0600`, generates different public and intern
 Read the complete [server deployment guide](https://idefav.github.io/web-search/en/deployment/) for existing reverse proxies, verification, logs, metrics, upgrades, rollback, network security, and troubleshooting. GitHub Pages hosts documentation only; it cannot execute the browser service.
 
 Search uses the stable-first provider chain `duckduckgo,brave,bing,google` by default. A blocked provider is cooled down for five minutes and the request automatically falls back to the next provider. Override the order with `WEB_SEARCH_PROVIDERS`; Google is always limited to one concurrent attempt. The project does not bypass CAPTCHA or search-engine controls.
+
+`web_fetch` performs one bounded readiness wait when a page initially exposes only an empty or iframe placeholder. This covers WeChat Official Account links that briefly pass through an automatic verification interstitial. A verification page that does not clear is returned as retryable `fetch_blocked`; the service never attempts to solve CAPTCHA.
 
 ## Connect an Agent
 

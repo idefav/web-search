@@ -1,3 +1,5 @@
+import { errorCodes } from "camofox-web-search-core";
+
 const errorResponse = {
   description: "Typed error",
   content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorResponse" } } }
@@ -5,7 +7,7 @@ const errorResponse = {
 
 export const openapi = {
   openapi: "3.1.0",
-  info: { title: "Camofox Web Search API", version: "0.0.2" },
+  info: { title: "Camofox Web Search API", version: "0.0.3" },
   components: {
     securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } },
     schemas: {
@@ -48,7 +50,7 @@ export const openapi = {
       ErrorResponse: {
         type: "object", required: ["request_id", "error"], properties: {
           request_id: { type: "string" },
-          error: { type: "object", required: ["code", "message", "retryable"], properties: { code: { type: "string" }, message: { type: "string" }, retryable: { type: "boolean" }, retry_after_seconds: { type: "integer", minimum: 1 } } }
+          error: { type: "object", required: ["code", "message", "retryable"], properties: { code: { type: "string", enum: errorCodes }, message: { type: "string" }, retryable: { type: "boolean" }, retry_after_seconds: { type: "integer", minimum: 1 } } }
         }
       }
     }

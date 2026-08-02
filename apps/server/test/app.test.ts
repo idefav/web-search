@@ -18,6 +18,7 @@ const config: ServerConfig = {
   maxQueue: 20,
   queueTimeoutMs: 5_000,
   operationTimeoutMs: 45_000,
+  fetchReadyTimeoutMs: 5_000,
   providerTimeoutMs: 15_000,
   providerCooldownMs: 300_000,
   providers: ["google"],
@@ -107,5 +108,39 @@ describe("gateway", () => {
     const text = await metrics.text();
     expect(text).toContain('camofox_web_search_provider_attempts_total{provider="google",outcome="blocked"} 1');
     expect(text).toContain('camofox_web_search_provider_circuit_open{provider="google"} 1');
+  });
+
+  it("classifies persistent WeChat verification for REST and MCP clients", async () => {
+    const upstream = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.endsWith("/tabs")) return json({ tabId: "wechat-tab", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "wechat-tab", url: "https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha" });
+      if (url.includes("/snapshot")) return json({ url: "https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha", snapshot: "- iframe", totalChars: 8 });
+      if (url.includes("/wait")) return json({ ok: true, ready: false });
+      return json({ ok: true });
+    });
+    const endpoint = await start(upstream as typeof fetch);
+    const response = await fetch(`${endpoint}/v1/fetch`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${config.publicKey}` },
+      body: JSON.stringify({ url: "https://mp.weixin.qq.com/s/article" })
+    });
+    expect(response.status).toBe(503);
+    expect(response.headers.get("retry-after")).toBe("60");
+    await expect(response.json()).resolves.toMatchObject({ error: { code: "fetch_blocked", retryable: true, retry_after_seconds: 60 } });
+
+    const metrics = await fetch(`${endpoint}/metrics`, { headers: { authorization: `Bearer ${config.publicKey}` } });
+    expect(await metrics.text()).toContain('camofox_web_search_fetch_readiness_total{reason="wechat_challenge",outcome="blocked"} 1');
+
+    const client = new Client({ name: "fetch-test", version: "1.0.0" });
+    const transport = new StreamableHTTPClientTransport(new URL(`${endpoint}/mcp`), {
+      requestInit: { headers: { authorization: `Bearer ${config.publicKey}` } }
+    });
+    await client.connect(transport);
+    const result = await client.callTool({ name: "web_fetch", arguments: { url: "https://mp.weixin.qq.com/s/article" } });
+    expect(result.isError).toBe(true);
+    expect(result.content).toEqual([expect.objectContaining({ text: expect.stringContaining("fetch_blocked") })]);
+    expect(result.structuredContent).toMatchObject({ error: { retry_after_seconds: 60 } });
+    await transport.close();
   });
 });

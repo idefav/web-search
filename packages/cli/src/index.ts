@@ -30,7 +30,7 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
     checks.push({ name: "health", ok: false, detail: error instanceof Error ? error.message : String(error) });
   }
   if (process.env.WEB_SEARCH_API_KEY) {
-    const client = new Client({ name: "camofox-web-search-doctor", version: "0.0.2" });
+    const client = new Client({ name: "camofox-web-search-doctor", version: "0.0.3" });
     const transport = new StreamableHTTPClientTransport(new URL(`${endpoint.replace(/\/$/, "")}/mcp`), {
       requestInit: { headers: { authorization: `Bearer ${process.env.WEB_SEARCH_API_KEY}` } }
     });

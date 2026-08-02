@@ -39,3 +39,5 @@ Only two high-level read-only tools are exposed. Browser clicking, typing, scrip
 Search results and fetched pages are untrusted input. Tool output includes warning boundaries, but every caller must retain its own prompt-injection policy.
 
 Search defaults to `duckduckgo → brave → bing → google`. Blocked providers enter a cooldown and are skipped automatically, while Google is separately limited to one concurrent attempt. Provider order and cooldowns are configured on the server, so Agent configurations do not change.
+
+Fetch performs one bounded readiness retry for empty or iframe-only pages. This lets transient WeChat verification interstitials finish while reporting persistent challenges as typed `fetch_blocked` errors instead of returning placeholder content.

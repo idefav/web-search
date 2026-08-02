@@ -37,6 +37,7 @@ internal_key=$(openssl rand -hex 32)
   printf 'WEB_SEARCH_PROVIDERS=%s\n' "${WEB_SEARCH_PROVIDERS:-duckduckgo,brave,bing,google}"
   printf 'WEB_SEARCH_PROVIDER_TIMEOUT_MS=%s\n' "${WEB_SEARCH_PROVIDER_TIMEOUT_MS:-15000}"
   printf 'WEB_SEARCH_PROVIDER_COOLDOWN_MS=%s\n' "${WEB_SEARCH_PROVIDER_COOLDOWN_MS:-300000}"
+  printf 'WEB_FETCH_READY_TIMEOUT_MS=%s\n' "${WEB_FETCH_READY_TIMEOUT_MS:-5000}"
   if [ -n "${WEB_SEARCH_DOMAIN:-}" ]; then printf 'WEB_SEARCH_DOMAIN=%s\n' "$WEB_SEARCH_DOMAIN"; fi
 } > "$env_file"
 

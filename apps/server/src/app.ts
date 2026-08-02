@@ -22,11 +22,13 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
   const providerAttempts = new Map<string, number>();
   const providerDurationSums = new Map<string, number>();
   const providerFallbacks = new Map<string, number>();
+  const fetchReadinessEvents = new Map<string, number>();
   const service = new WebSearchService(camofox, {
     concurrency: config.concurrency,
     maxQueue: config.maxQueue,
     queueTimeoutMs: config.queueTimeoutMs,
     operationTimeoutMs: config.operationTimeoutMs,
+    fetchReadyTimeoutMs: config.fetchReadyTimeoutMs,
     providerTimeoutMs: config.providerTimeoutMs,
     providerCooldownMs: config.providerCooldownMs,
     providers: createBuiltinSearchProviders(config.providers),
@@ -39,6 +41,11 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
     onProviderFallback: (event) => {
       const key = `${event.from}|${event.to}`;
       providerFallbacks.set(key, (providerFallbacks.get(key) ?? 0) + 1);
+    },
+    onFetchReadiness: (event) => {
+      const key = `${event.reason}|${event.outcome}`;
+      fetchReadinessEvents.set(key, (fetchReadinessEvents.get(key) ?? 0) + 1);
+      process.stdout.write(`${JSON.stringify({ level: "info", message: "fetch_readiness", request_id: event.requestId, reason: event.reason, outcome: event.outcome, duration_ms: event.durationMs })}\n`);
     }
   });
   const app = express();
@@ -110,6 +117,12 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
       ...[...providerFallbacks.entries()].map(([key, value]) => {
         const [from, to] = key.split("|");
         return `camofox_web_search_provider_fallbacks_total{from="${from}",to="${to}"} ${value}`;
+      }),
+      "# HELP camofox_web_search_fetch_readiness_total Fetch readiness waits by trigger and outcome.",
+      "# TYPE camofox_web_search_fetch_readiness_total counter",
+      ...[...fetchReadinessEvents.entries()].map(([key, value]) => {
+        const [reason, outcome] = key.split("|");
+        return `camofox_web_search_fetch_readiness_total{reason="${reason}",outcome="${outcome}"} ${value}`;
       }),
       "# HELP camofox_web_search_provider_circuit_open Whether a provider cooldown circuit is open.",
       "# TYPE camofox_web_search_provider_circuit_open gauge",

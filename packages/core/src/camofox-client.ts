@@ -14,6 +14,7 @@ export interface SnapshotResponse {
   hasMore?: boolean;
   nextOffset?: number | null;
 }
+export interface WaitResponse { ok: boolean; ready?: boolean }
 
 export class CamofoxHttpError extends Error {
   constructor(public readonly status: number, message: string, public readonly body?: unknown) {
@@ -65,6 +66,13 @@ export class CamofoxClient {
   snapshot(tabId: string, userId: string, offset = 0, signal?: AbortSignal): Promise<SnapshotResponse> {
     const query = new URLSearchParams({ userId, format: "text", offset: String(offset) });
     return this.request(`/tabs/${encodeURIComponent(tabId)}/snapshot?${query}`, { method: "GET" }, signal);
+  }
+
+  waitForPageReady(tabId: string, userId: string, timeout: number, signal?: AbortSignal): Promise<WaitResponse> {
+    return this.request(`/tabs/${encodeURIComponent(tabId)}/wait`, {
+      method: "POST",
+      body: JSON.stringify({ userId, timeout })
+    }, signal);
   }
 
   closeTab(tabId: string, userId: string, signal?: AbortSignal): Promise<void> {

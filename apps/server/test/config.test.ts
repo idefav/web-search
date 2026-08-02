@@ -12,9 +12,15 @@ describe("server provider configuration", () => {
   it("uses the stable-first provider chain by default", () => {
     expect(loadConfig()).toMatchObject({
       providers: ["duckduckgo", "brave", "bing", "google"],
+      fetchReadyTimeoutMs: 5_000,
       providerTimeoutMs: 15_000,
       providerCooldownMs: 300_000
     });
+  });
+
+  it("accepts an explicit fetch readiness timeout", () => {
+    vi.stubEnv("WEB_FETCH_READY_TIMEOUT_MS", "7000");
+    expect(loadConfig().fetchReadyTimeoutMs).toBe(7_000);
   });
 
   it("accepts an explicit provider order", () => {

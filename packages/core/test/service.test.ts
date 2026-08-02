@@ -51,6 +51,129 @@ describe("Camofox orchestration", () => {
     expect(calls.some((call) => call.startsWith("DELETE http://camofox/sessions/web-fetch-request-2"))).toBe(true);
   });
 
+  it("waits through a transient WeChat verification page and removes its temporary token", async () => {
+    const calls: string[] = [];
+    const readiness: unknown[] = [];
+    let snapshots = 0;
+    const requestedUrl = "https://mp.weixin.qq.com/s?__biz=test&mid=1&idx=1&sn=article";
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      calls.push(`${init?.method ?? "GET"} ${url}`);
+      if (url.endsWith("/tabs")) return json({ tabId: "wechat-tab", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "wechat-tab", url: `https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha?target_url=${encodeURIComponent(requestedUrl)}` });
+      if (url.includes("/wait")) return json({ ok: true, ready: true });
+      if (url.includes("/snapshot")) {
+        snapshots += 1;
+        if (snapshots === 1) return json({ url: "https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha", snapshot: "- iframe", totalChars: 8 });
+        return json({ url: `${requestedUrl}&poc_token=temporary`, snapshot: '- heading "Article" [level=1]\n- paragraph: readable body', totalChars: 58 });
+      }
+      return json({ ok: true });
+    });
+    const service = new WebSearchService(new CamofoxClient("http://camofox", "internal-secret", fetchMock as typeof fetch), {
+      id: () => "wechat-request",
+      providers: googleOnly(),
+      resolver: async () => ["101.32.118.25"],
+      onFetchReadiness: (event) => readiness.push(event)
+    });
+    const result = await service.fetchPage({ url: requestedUrl, offset: 0, max_chars: 200 });
+    expect(result.content).toContain("readable body");
+    expect(result.final_url).toBe(requestedUrl);
+    expect(calls.some((call) => call.includes("/wait"))).toBe(true);
+    expect(readiness).toEqual([expect.objectContaining({ requestId: "wechat-request", reason: "wechat_challenge", outcome: "recovered" })]);
+    expect(calls.at(-1)).toContain("DELETE http://camofox/sessions/web-fetch-wechat-request");
+  });
+
+  it("returns a retryable typed error when WeChat verification persists", async () => {
+    const calls: string[] = [];
+    const readiness: unknown[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      calls.push(`${init?.method ?? "GET"} ${url}`);
+      if (url.endsWith("/tabs")) return json({ tabId: "blocked-wechat", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "blocked-wechat", url: "https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha" });
+      if (url.includes("/snapshot")) return json({ url: "https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha", snapshot: "- iframe", totalChars: 8 });
+      if (url.includes("/wait")) return json({ ok: true, ready: false });
+      return json({ ok: true });
+    });
+    const service = new WebSearchService(new CamofoxClient("http://camofox", "internal-secret", fetchMock as typeof fetch), {
+      providers: googleOnly(),
+      resolver: async () => ["101.32.118.25"],
+      onFetchReadiness: (event) => readiness.push(event)
+    });
+    await expect(service.fetchPage({ url: "https://mp.weixin.qq.com/s/article", offset: 0, max_chars: 200 })).rejects.toMatchObject({
+      code: "fetch_blocked",
+      retryable: true,
+      retryAfterSeconds: 60
+    });
+    expect(readiness).toEqual([expect.objectContaining({ reason: "wechat_challenge", outcome: "blocked" })]);
+    expect(calls.at(-1)).toContain("DELETE http://camofox/sessions/web-fetch-");
+  });
+
+  it("retries a generic placeholder before applying offset pagination", async () => {
+    const calls: string[] = [];
+    let snapshots = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      calls.push(`${init?.method ?? "GET"} ${url}`);
+      if (url.endsWith("/tabs")) return json({ tabId: "dynamic-tab", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "dynamic-tab", url: "https://example.com/dynamic" });
+      if (url.includes("/wait")) return json({ ok: true, ready: true });
+      if (url.includes("offset=5")) return json({ url: "https://example.com/dynamic", snapshot: "fghij", totalChars: 10 });
+      if (url.includes("/snapshot")) {
+        snapshots += 1;
+        return snapshots === 1
+          ? json({ url: "https://example.com/dynamic", snapshot: "", totalChars: 0 })
+          : json({ url: "https://example.com/dynamic", snapshot: "abcdefghij", totalChars: 10 });
+      }
+      return json({ ok: true });
+    });
+    const service = new WebSearchService(new CamofoxClient("http://camofox", "internal-secret", fetchMock as typeof fetch), {
+      providers: googleOnly(),
+      resolver: async () => ["93.184.216.34"]
+    });
+    const result = await service.fetchPage({ url: "https://example.com/dynamic", offset: 5, max_chars: 3 });
+    expect(result).toMatchObject({ content: "fgh", next_offset: 8, total_chars: 10 });
+    expect(calls.filter((call) => call.includes("/snapshot"))).toHaveLength(3);
+    expect(calls.filter((call) => call.includes("/wait"))).toHaveLength(1);
+  });
+
+  it("rejects a generic placeholder that remains unreadable after waiting", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.endsWith("/tabs")) return json({ tabId: "iframe-tab", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "iframe-tab", url: "https://example.com/iframe" });
+      if (url.includes("/snapshot")) return json({ url: "https://example.com/iframe", snapshot: "- iframe:", totalChars: 9 });
+      if (url.includes("/wait")) return json({ ok: true, ready: false });
+      return json({ ok: true });
+    });
+    const service = new WebSearchService(new CamofoxClient("http://camofox", "internal-secret", fetchMock as typeof fetch), {
+      providers: googleOnly(),
+      resolver: async () => ["93.184.216.34"]
+    });
+    await expect(service.fetchPage({ url: "https://example.com/iframe", offset: 0, max_chars: 20 })).rejects.toMatchObject({
+      code: "unsupported_content",
+      retryable: false
+    });
+  });
+
+  it("does not wait when the first snapshot is readable", async () => {
+    const calls: string[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      calls.push(`${init?.method ?? "GET"} ${url}`);
+      if (url.endsWith("/tabs")) return json({ tabId: "ready-tab", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "ready-tab", url: "https://example.com/ready" });
+      if (url.includes("/snapshot")) return json({ url: "https://example.com/ready", snapshot: "readable", totalChars: 8 });
+      return json({ ok: true });
+    });
+    const service = new WebSearchService(new CamofoxClient("http://camofox", "internal-secret", fetchMock as typeof fetch), {
+      providers: googleOnly(),
+      resolver: async () => ["93.184.216.34"]
+    });
+    await expect(service.fetchPage({ url: "https://example.com/ready", offset: 0, max_chars: 20 })).resolves.toMatchObject({ content: "readable" });
+    expect(calls.some((call) => call.includes("/wait"))).toBe(false);
+  });
+
   it("classifies an empty Google shell as blocked and closes its tab", async () => {
     const calls: Array<{ url: string; method: string }> = [];
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {

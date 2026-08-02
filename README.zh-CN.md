@@ -25,7 +25,7 @@ Agent ──HTTPS/MCP 或 REST──> Gateway ──内部网络──> Camofox 
 生产部署主线是安装了 Docker Engine、Compose v2、Git 和 OpenSSL 的 64 位 Linux 主机。源码 tag 与 GHCR 镜像必须使用同一个版本：
 
 ```bash
-VERSION="0.0.2"
+VERSION="0.0.3"
 git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
 cd web-search
 WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
@@ -44,6 +44,8 @@ Bootstrap 会以 `0600` 权限创建 `.env`，生成不同的公开与内部 Key
 已有反向代理、部署验证、日志与 metrics、升级回滚、网络安全和排障请查看完整的[服务端部署指南](https://idefav.github.io/web-search/zh-CN/deployment/)。GitHub Pages 只托管文档，不能运行浏览器服务。
 
 默认按稳定优先顺序使用 `duckduckgo,brave,bing,google`。某个 Provider 被拦截后会进入五分钟冷却，并自动切换到下一个 Provider；可通过 `WEB_SEARCH_PROVIDERS` 调整顺序。Google 始终限制为单并发。项目不会绕过 CAPTCHA 或搜索引擎访问控制。
+
+`web_fetch` 遇到首次 snapshot 为空或只有 iframe 占位时，会执行一次有界的页面就绪等待，可处理微信公众号链接短暂经过自动验证中间页的情况。验证页未自动恢复时会返回可重试的 `fetch_blocked`；服务不会尝试解决 CAPTCHA。
 
 ## 接入 Agent
 

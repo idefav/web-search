@@ -25,7 +25,7 @@ The source tag and gateway image tag must match. The generated command defaults 
 
 Without a domain, the gateway listens only on `127.0.0.1:8080`. With a domain, bootstrap adds the Caddy overlay and provisions HTTPS automatically. The script creates `.env` with mode `0600`, generates independent 64-character public and internal keys, pulls every image, and waits for readiness.
 
-## Configure search providers
+## Configure search and fetch readiness
 
 The default provider order is stable-first and needs no additional credentials:
 
@@ -33,11 +33,14 @@ The default provider order is stable-first and needs no additional credentials:
 WEB_SEARCH_PROVIDERS=duckduckgo,brave,bing,google
 WEB_SEARCH_PROVIDER_TIMEOUT_MS=15000
 WEB_SEARCH_PROVIDER_COOLDOWN_MS=300000
+WEB_FETCH_READY_TIMEOUT_MS=5000
 ```
 
 The list controls both enabled providers and fallback order. It must contain unique built-in names and cannot be empty. Use `google` alone to retain single-engine behavior, or place it first for Google-first results. Google has a fixed one-at-a-time limit even when the gateway browser concurrency is higher.
 
 On `search_blocked`, the provider immediately enters cooldown and the same request continues with the next provider. During cooldown, requests skip it without opening a browser tab. After expiry, one request performs a half-open probe. Explicit no-results responses do not trigger fallback. The gateway also falls back for provider timeouts, unavailability, and parser contract changes, but only blocking opens the cooldown circuit.
+
+`WEB_FETCH_READY_TIMEOUT_MS` bounds the one-time readiness wait used when `web_fetch` initially sees an empty or iframe-only placeholder. In particular, some WeChat Official Account share links first enter an automatic verification interstitial and return to the article a few seconds later. The gateway waits once and takes a fresh snapshot; it does not click or solve a CAPTCHA.
 
 ## Choose an exposure mode
 
@@ -94,7 +97,7 @@ docker compose --env-file .env -f deploy/compose.yaml down
 
 `down` preserves named volumes. Do not add `-v` unless deleting Caddy certificates and cached GeoLite data is intentional.
 
-The authenticated `/metrics` endpoint is available through the loopback gateway. It includes provider attempt/outcome, fallback, latency, and circuit-state metrics. The bundled public Caddy configuration returns 404 for it by design.
+The authenticated `/metrics` endpoint is available through the loopback gateway. It includes provider attempt/outcome, fallback, latency, circuit-state, and fetch-readiness recovery metrics. The bundled public Caddy configuration returns 404 for it by design.
 
 ## Upgrade and rollback
 
@@ -124,7 +127,8 @@ Rollback uses the same procedure with the previous source tag and image tag. Bac
 | 401 `unauthorized` | Confirm the Agent process inherited the same `WEB_SEARCH_API_KEY` stored in the server `.env`. |
 | 429 or `busy` | Reduce caller concurrency or adjust the gateway limits deliberately. |
 | `search_blocked` | Every enabled provider is blocked or cooling down. Honor `Retry-After`, or configure a legitimate parent proxy behind Squid; never bypass the egress guard. |
+| `fetch_blocked` for a WeChat article | The verification interstitial did not clear within the readiness timeout. Honor `Retry-After`; repeated immediate retries can make IP-based controls worse. A compliant upstream proxy may improve reliability, but the service will not solve CAPTCHA or import a login session. |
 | `unsafe_url` | The requested URL resolved to a private, reserved, local, or otherwise prohibited destination. This is expected protection. |
 | `upstream_timeout` | Inspect browser/egress logs and retry only when the response marks the error retryable. |
 
-The project does not solve CAPTCHA or bypass search-engine controls. Search availability still depends on the reputation and policy of the deployment's public egress IP.
+The project does not solve CAPTCHA or bypass site controls. Search and fetch availability still depend on the reputation and policy of the deployment's public egress IP.

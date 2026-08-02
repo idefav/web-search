@@ -61,6 +61,7 @@ export const errorCodes = [
   "upstream_timeout",
   "upstream_unavailable",
   "search_blocked",
+  "fetch_blocked",
   "upstream_contract_changed",
   "unsupported_content"
 ] as const;

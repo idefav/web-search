@@ -15,16 +15,28 @@ export interface ProviderAttemptEvent {
   durationMs: number;
 }
 
+export type FetchReadinessReason = "placeholder" | "wechat_challenge";
+export type FetchReadinessOutcome = "recovered" | "blocked" | "unsupported";
+
+export interface FetchReadinessEvent {
+  requestId: string;
+  reason: FetchReadinessReason;
+  outcome: FetchReadinessOutcome;
+  durationMs: number;
+}
+
 export interface ServiceOptions {
   concurrency?: number;
   maxQueue?: number;
   queueTimeoutMs?: number;
   operationTimeoutMs?: number;
+  fetchReadyTimeoutMs?: number;
   providerTimeoutMs?: number;
   providerCooldownMs?: number;
   providers?: readonly SearchProvider[];
   onProviderAttempt?: (event: ProviderAttemptEvent) => void;
   onProviderFallback?: (event: { requestId: string; from: string; to: string }) => void;
+  onFetchReadiness?: (event: FetchReadinessEvent) => void;
   resolver?: Resolver;
   now?: () => Date;
   id?: () => string;
@@ -43,9 +55,54 @@ function shouldRetry(error: unknown): boolean {
   return error instanceof CamofoxHttpError && [410, 503, 504].includes(error.status);
 }
 
+function parsedUrl(value: string): URL | undefined {
+  try { return new URL(value); } catch { return undefined; }
+}
+
+function isWeChatUrl(value: string): boolean {
+  return parsedUrl(value)?.hostname.toLowerCase() === "mp.weixin.qq.com";
+}
+
+function isWeChatChallengeUrl(value: string): boolean {
+  const url = parsedUrl(value);
+  return url?.hostname.toLowerCase() === "mp.weixin.qq.com" && url.pathname === "/mp/wappoc_appmsgcaptcha";
+}
+
+function isPlaceholderSnapshot(snapshot: string): boolean {
+  const content = snapshot.trim();
+  if (!content) return true;
+  return content.split(/\r?\n/).every((line) => /^-\s*iframe(?:\s.*|:.*)?$/i.test(line.trim()));
+}
+
+function hasWeChatChallengeText(snapshot: string): boolean {
+  return /环境异常|完成验证后即可继续访问|当前访问疑似存在安全风险|访问过于频繁|操作频繁/i.test(snapshot);
+}
+
+function fetchReadinessReason(requestedUrl: string, navigationUrl: string, snapshot: string, snapshotUrl: string): FetchReadinessReason | undefined {
+  const placeholder = isPlaceholderSnapshot(snapshot);
+  if ((isWeChatUrl(requestedUrl) || isWeChatUrl(snapshotUrl)) &&
+      (isWeChatChallengeUrl(snapshotUrl) || hasWeChatChallengeText(snapshot) || (isWeChatChallengeUrl(navigationUrl) && placeholder))) {
+    return "wechat_challenge";
+  }
+  return placeholder ? "placeholder" : undefined;
+}
+
+function publicFinalUrl(value: string): string {
+  const url = parsedUrl(value);
+  if (!url || url.hostname.toLowerCase() !== "mp.weixin.qq.com") return value;
+  const queryStart = value.indexOf("?");
+  const fragmentStart = value.indexOf("#");
+  if (queryStart < 0 || (fragmentStart >= 0 && queryStart > fragmentStart)) return value;
+  const end = fragmentStart < 0 ? value.length : fragmentStart;
+  const query = value.slice(queryStart + 1, end);
+  const retained = query.split("&").filter((part) => part.split("=", 1)[0]?.toLowerCase() !== "poc_token");
+  return `${value.slice(0, queryStart)}${retained.length ? `?${retained.join("&")}` : ""}${value.slice(end)}`;
+}
+
 export class WebSearchService {
   private readonly semaphore: SlotSemaphore;
   private readonly timeoutMs: number;
+  private readonly fetchReadyTimeoutMs: number;
   private readonly resolver?: Resolver;
   private readonly now: () => Date;
   private readonly id: () => string;
@@ -56,10 +113,12 @@ export class WebSearchService {
   private readonly circuits = new Map<string, { blockedUntil: number; probeInFlight: boolean }>();
   private readonly onProviderAttempt?: (event: ProviderAttemptEvent) => void;
   private readonly onProviderFallback?: (event: { requestId: string; from: string; to: string }) => void;
+  private readonly onFetchReadiness?: (event: FetchReadinessEvent) => void;
 
   constructor(private readonly camofox: CamofoxClient, options: ServiceOptions = {}) {
     this.semaphore = new SlotSemaphore(options.concurrency ?? 3, options.maxQueue ?? 20, options.queueTimeoutMs ?? 5_000);
     this.timeoutMs = options.operationTimeoutMs ?? 45_000;
+    this.fetchReadyTimeoutMs = options.fetchReadyTimeoutMs ?? 5_000;
     this.providerTimeoutMs = options.providerTimeoutMs ?? 15_000;
     this.providerCooldownMs = options.providerCooldownMs ?? 300_000;
     this.resolver = options.resolver;
@@ -69,6 +128,7 @@ export class WebSearchService {
     if (this.providers.length === 0) throw new Error("At least one search provider is required");
     this.onProviderAttempt = options.onProviderAttempt;
     this.onProviderFallback = options.onProviderFallback;
+    this.onFetchReadiness = options.onFetchReadiness;
     for (const provider of this.providers) {
       if (provider.concurrency) {
         this.providerSemaphores.set(provider.id, new SlotSemaphore(provider.concurrency, options.maxQueue ?? 20, options.queueTimeoutMs ?? 5_000));
@@ -135,7 +195,7 @@ export class WebSearchService {
       return {
         request_id: requestId,
         requested_url: input.url,
-        final_url: result.url,
+        final_url: publicFinalUrl(result.url),
         content_format: "accessibility_text",
         content: result.content,
         total_chars: result.totalChars,
@@ -315,12 +375,30 @@ export class WebSearchService {
     const { tabId } = await this.camofox.createTab(userId, sessionKey, signal);
     try {
       const navigation = await this.camofox.navigate(tabId, userId, sessionKey, input.url, signal);
-      const initial = await this.camofox.snapshot(tabId, userId, 0, signal);
-      if (input.offset >= initial.totalChars) return { url: navigation.url || initial.url, content: "", totalChars: initial.totalChars, nextOffset: null };
+      let initial = await this.camofox.snapshot(tabId, userId, 0, signal);
+      const readinessReason = fetchReadinessReason(input.url, navigation.url, initial.snapshot, initial.url);
+      if (readinessReason) {
+        const started = Date.now();
+        await this.camofox.waitForPageReady(tabId, userId, this.fetchReadyTimeoutMs, signal);
+        initial = await this.camofox.snapshot(tabId, userId, 0, signal);
+        const durationMs = Math.max(0, Date.now() - started);
+        const persistentWeChatChallenge = isWeChatChallengeUrl(initial.url) || hasWeChatChallengeText(initial.snapshot) ||
+          (isWeChatUrl(input.url) && isPlaceholderSnapshot(initial.snapshot));
+        if (persistentWeChatChallenge) {
+          this.onFetchReadiness?.({ requestId: sessionKey, reason: readinessReason, outcome: "blocked", durationMs });
+          throw new WebToolError("fetch_blocked", "WeChat requires an interactive verification before this article can be read", true, 503, undefined, 60);
+        }
+        if (isPlaceholderSnapshot(initial.snapshot)) {
+          this.onFetchReadiness?.({ requestId: sessionKey, reason: readinessReason, outcome: "unsupported", durationMs });
+          throw new WebToolError("unsupported_content", "The page did not expose readable accessibility text after waiting for it to become ready");
+        }
+        this.onFetchReadiness?.({ requestId: sessionKey, reason: readinessReason, outcome: "recovered", durationMs });
+      }
+      if (input.offset >= initial.totalChars) return { url: initial.url || navigation.url, content: "", totalChars: initial.totalChars, nextOffset: null };
       const window = input.offset > 0 ? await this.camofox.snapshot(tabId, userId, input.offset, signal) : initial;
       const content = window.snapshot.slice(0, input.max_chars);
       const next = input.offset + content.length < window.totalChars ? input.offset + content.length : null;
-      return { url: navigation.url || window.url, content, totalChars: window.totalChars, nextOffset: next };
+      return { url: window.url || initial.url || navigation.url, content, totalChars: window.totalChars, nextOffset: next };
     } finally {
       await this.camofox.closeTab(tabId, userId, AbortSignal.timeout(5_000)).catch(() => undefined);
     }

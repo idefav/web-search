@@ -18,6 +18,18 @@ fetch_body=$(curl -fsS -H "authorization: Bearer $api_key" -H 'content-type: app
   -d '{"url":"https://example.com/","max_chars":2000}' "$endpoint/v1/fetch")
 node -e 'const x=JSON.parse(process.argv[1]); if(x.content_format!=="accessibility_text"||!x.content||x.final_url!=="https://example.com/") process.exit(1)' "$fetch_body"
 
+wechat_file=/tmp/camofox-web-search-wechat-fetch.json
+wechat_code=$(curl -sS --max-time 55 -o "$wechat_file" -w '%{http_code}' \
+  -H "authorization: Bearer $api_key" -H 'content-type: application/json' \
+  -d '{"url":"https://mp.weixin.qq.com/s?__biz=Mzg5MzEyNzEwNQ==&mid=2247827469&idx=1&sn=4427e49e9ebc2e1ba0f79cca044d76a6","max_chars":2000}' \
+  "$endpoint/v1/fetch")
+node -e '
+  const fs=require("fs"); const status=Number(process.argv[1]); const x=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
+  if(status===200 && x.content_format==="accessibility_text" && x.content?.trim() && x.content.trim()!=="- iframe" && !x.final_url.includes("wappoc_appmsgcaptcha") && !x.final_url.includes("poc_token")) process.exit(0);
+  if(status===503 && x.error?.code==="fetch_blocked" && x.error?.retryable===true && x.error?.retry_after_seconds===60) process.exit(0);
+  console.error(x); process.exit(1);
+' "$wechat_code" "$wechat_file"
+
 unsafe_code=$(curl -sS -o /tmp/camofox-web-search-unsafe.json -w '%{http_code}' \
   -H "authorization: Bearer $api_key" -H 'content-type: application/json' \
   -d '{"url":"http://169.254.169.254/latest/meta-data/"}' "$endpoint/v1/fetch")
@@ -48,4 +60,4 @@ for provider in duckduckgo brave bing google; do
   done
 done
 
-echo "Docker REST, MCP, SSRF, multi-provider live-search classification, and tab cleanup E2E passed"
+echo "Docker REST, MCP, SSRF, WeChat fetch readiness, multi-provider live-search classification, and tab cleanup E2E passed"

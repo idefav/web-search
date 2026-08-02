@@ -18,6 +18,7 @@ export interface ServerConfig {
   maxQueue: number;
   queueTimeoutMs: number;
   operationTimeoutMs: number;
+  fetchReadyTimeoutMs: number;
   providerTimeoutMs: number;
   providerCooldownMs: number;
   providers: string[];
@@ -50,6 +51,7 @@ export function loadConfig(): ServerConfig {
     maxQueue: integer("WEB_SEARCH_MAX_QUEUE", 20),
     queueTimeoutMs: integer("WEB_SEARCH_QUEUE_TIMEOUT_MS", 5_000),
     operationTimeoutMs: integer("WEB_SEARCH_OPERATION_TIMEOUT_MS", 45_000),
+    fetchReadyTimeoutMs: integer("WEB_FETCH_READY_TIMEOUT_MS", 5_000),
     providerTimeoutMs: integer("WEB_SEARCH_PROVIDER_TIMEOUT_MS", 15_000),
     providerCooldownMs: integer("WEB_SEARCH_PROVIDER_COOLDOWN_MS", 300_000),
     providers: providers(),

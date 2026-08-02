@@ -9,6 +9,7 @@ const statusByCode: Record<ErrorCode, number> = {
   upstream_contract_changed: 502,
   upstream_unavailable: 503,
   search_blocked: 503,
+  fetch_blocked: 503,
   upstream_timeout: 504
 };
 
