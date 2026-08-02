@@ -18,7 +18,8 @@ const languages = {
     project: "Overview",
     deployment: "Server deployment",
     examples: "Examples",
-    releases: "Releases"
+    releases: "Releases",
+    article: "Article"
   },
   "zh-CN": {
     label: "简体中文",
@@ -27,15 +28,23 @@ const languages = {
     project: "项目概览",
     deployment: "服务端部署",
     examples: "示例",
-    releases: "版本记录"
+    releases: "版本记录",
+    article: "深度文章"
   }
 };
 
 const pages = [
-  { slug: "", file: "index.md", title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
-  { slug: "deployment", file: "deployment.md", title: { en: "Server deployment", "zh-CN": "服务端部署" } },
-  { slug: "examples", file: "examples.md", title: { en: "Examples", "zh-CN": "示例" } },
-  { slug: "releases", file: "releases.md", title: { en: "Release notes", "zh-CN": "版本记录" } }
+  { slug: "", file: "index.md", label: "project", title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
+  { slug: "deployment", file: "deployment.md", label: "deployment", title: { en: "Server deployment", "zh-CN": "服务端部署" } },
+  { slug: "examples", file: "examples.md", label: "examples", title: { en: "Examples", "zh-CN": "示例" } },
+  { slug: "releases", file: "releases.md", label: "releases", title: { en: "Release notes", "zh-CN": "版本记录" } },
+  {
+    slug: "article",
+    source: join(root, "articles", "web-search-for-ai-agents.md"),
+    label: "article",
+    languages: ["zh-CN"],
+    title: { "zh-CN": "让 AI Agent 真正看见互联网" }
+  }
 ];
 
 function pageUrl(language, slug, current) {
@@ -45,12 +54,13 @@ function pageUrl(language, slug, current) {
 
 function navigation(language, current) {
   const labels = languages[language];
-  const links = pages.map((page) => {
-    const label = page.slug === "deployment" ? labels.deployment : page.slug === "examples" ? labels.examples : page.slug === "releases" ? labels.releases : labels.project;
+  const links = pages.filter((page) => !page.languages || page.languages.includes(language)).map((page) => {
+    const label = labels[page.label];
     const active = page.slug === current ? " aria-current=\"page\"" : "";
     return `<a href="${pageUrl(language, page.slug, current)}"${active}>${label}</a>`;
   }).join("");
-  return `${links}<a class="language-link" href="${pageUrl(labels.alternateCode, current, current)}" data-language="${labels.alternateCode}">${labels.alternate}</a>`;
+  const alternatePage = pages.find((page) => page.slug === current && (!page.languages || page.languages.includes(labels.alternateCode)));
+  return `${links}<a class="language-link" href="${pageUrl(labels.alternateCode, alternatePage ? current : "", current)}" data-language="${labels.alternateCode}">${labels.alternate}</a>`;
 }
 
 function renderTemplate({ language, slug, title, content }) {
@@ -72,8 +82,16 @@ await mkdir(output, { recursive: true });
 
 for (const language of Object.keys(languages)) {
   for (const page of pages) {
-    const markdownPath = join(source, "content", language, page.file);
-    const markdown = (await readFile(markdownPath, "utf8")).replaceAll("{{version}}", version);
+    if (page.languages && !page.languages.includes(language)) continue;
+    const markdownPath = page.source ?? join(source, "content", language, page.file);
+    let markdown = (await readFile(markdownPath, "utf8")).replaceAll("{{version}}", version);
+    if (page.source) {
+      markdown = markdown
+        .replaceAll("(./assets/", "(../../articles/assets/")
+        .replaceAll("(../docs/content/zh-CN/deployment.md)", "(../deployment/)")
+        .replaceAll("(../docs/content/zh-CN/examples.md)", "(../examples/)")
+        .replaceAll("(../README.zh-CN.md)", "(https://github.com/idefav/web-search/blob/main/README.zh-CN.md)");
+    }
     const rootPrefix = page.slug ? "../../" : "../";
     const content = (await marked.parse(markdown, { gfm: true })).replaceAll('href="/', `href="${rootPrefix}`);
     const target = join(output, language, page.slug, "index.html");
@@ -94,6 +112,7 @@ await writeFile(join(output, "index.html"), rootPage);
 await cp(join(source, "styles.css"), join(output, "styles.css"));
 await cp(join(source, "app.js"), join(output, "app.js"));
 await cp(join(source, "assets"), join(output, "assets"), { recursive: true });
+await cp(join(root, "articles", "assets"), join(output, "articles", "assets"), { recursive: true });
 await cp(join(root, "examples", "deepagents", "demo.cast"), join(output, "assets", "deepagents-demo.cast"));
 await cp(join(root, "node_modules", "asciinema-player", "dist", "bundle", "asciinema-player.css"), join(output, "assets", "asciinema-player.css"));
 await cp(join(root, "node_modules", "asciinema-player", "dist", "bundle", "asciinema-player.min.js"), join(output, "assets", "asciinema-player.min.js"));

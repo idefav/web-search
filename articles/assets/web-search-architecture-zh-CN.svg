@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1710" viewBox="0 0 1200 1710" role="img" aria-labelledby="title desc">
+  <title id="title">Camofox Web Search 架构</title>
+  <desc id="desc">Agent 通过 MCP 或 REST 访问只读网关，再经过浏览器和 SSRF 防护访问公开网络</desc>
+  <rect width="1200" height="1710" rx="40" fill="#f8fcff"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="70" y="96" font-size="50" font-weight="800" fill="#102a43">一项服务，为所有 Agent 提供联网能力</text>
+    <text x="70" y="150" font-size="28" fill="#627d98">只暴露 web_search 与 web_fetch，把完整浏览器留在安全边界内</text>
+    <g transform="translate(110 220)">
+      <rect width="980" height="230" rx="32" fill="#ffffff" stroke="#38bdf8" stroke-width="5"/>
+      <circle cx="100" cy="92" r="52" fill="#e0f2fe"/><text x="100" y="110" text-anchor="middle" font-size="50" font-weight="800" fill="#0284c7">A</text>
+      <text x="190" y="82" font-size="42" font-weight="800" fill="#102a43">Coding Agents</text>
+      <text x="190" y="137" font-size="29" fill="#486581">Codex · Claude Code · OpenCode · Pi</text>
+      <text x="190" y="181" font-size="29" fill="#486581">LangChain · 自研 Agent · 任意 MCP / REST 客户端</text>
+    </g>
+    <path d="M600 465 V535" stroke="#14b8a6" stroke-width="12" stroke-linecap="round"/><path d="M575 515 L600 542 L625 515" fill="none" stroke="#14b8a6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="650" y="510" font-size="27" font-weight="700" fill="#0f766e">MCP / REST</text>
+    <g transform="translate(110 560)">
+      <rect width="980" height="440" rx="32" fill="#ffffff" stroke="#14b8a6" stroke-width="6"/>
+      <text x="490" y="72" text-anchor="middle" font-size="44" font-weight="800" fill="#102a43">只读 Web Search Gateway</text>
+      <rect x="100" y="118" width="360" height="100" rx="25" fill="#e6fffa"/>
+      <text x="280" y="181" text-anchor="middle" font-size="39" font-weight="750" fill="#0f766e">web_search</text>
+      <rect x="520" y="118" width="360" height="100" rx="25" fill="#e0f2fe"/>
+      <text x="700" y="181" text-anchor="middle" font-size="39" font-weight="750" fill="#0284c7">web_fetch</text>
+      <text x="490" y="290" text-anchor="middle" font-size="30" fill="#486581">Bearer 认证 · 速率限制 · 并发上限 · 队列与超时</text>
+      <text x="490" y="340" text-anchor="middle" font-size="30" fill="#486581">类型化错误 · 请求 ID · Prometheus metrics</text>
+      <text x="490" y="395" text-anchor="middle" font-size="27" fill="#829ab1">Agent 不获得登录、Cookie、点击、输入与脚本执行能力</text>
+    </g>
+    <path d="M600 1015 V1080" stroke="#14b8a6" stroke-width="12" stroke-linecap="round"/><path d="M575 1060 L600 1087 L625 1060" fill="none" stroke="#14b8a6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(110 1100)">
+      <rect width="980" height="270" rx="32" fill="#ffffff" stroke="#38bdf8" stroke-width="5"/>
+      <circle cx="105" cy="105" r="54" fill="#e0f2fe"/><text x="105" y="124" text-anchor="middle" font-size="52" font-weight="800" fill="#0284c7">C</text>
+      <text x="195" y="92" font-size="42" font-weight="800" fill="#102a43">Camofox Browser</text>
+      <text x="195" y="147" font-size="29" fill="#486581">固定版本 · accessibility text · 会话清理</text>
+      <rect x="195" y="180" width="560" height="60" rx="22" fill="#dcfce7"/>
+      <text x="475" y="219" text-anchor="middle" font-size="27" font-weight="700" fill="#15803d">DuckDuckGo · Brave · Bing · Google 自动容错</text>
+    </g>
+    <path d="M600 1385 V1435" stroke="#22c55e" stroke-width="12" stroke-linecap="round"/><path d="M575 1415 L600 1442 L625 1415" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="110" y="1460" width="980" height="155" rx="32" fill="#ffffff" stroke="#22c55e" stroke-width="5"/>
+    <text x="600" y="1522" text-anchor="middle" font-size="35" font-weight="750" fill="#15803d">SSRF Guard 与隔离出口代理</text>
+    <text x="600" y="1571" text-anchor="middle" font-size="27" fill="#486581">拒绝本机、私网、链路本地和保留地址后访问 Public Web</text>
+    <text x="600" y="1670" text-anchor="middle" font-size="30" font-weight="700" fill="#0284c7">最终目标：安全、只读地搜索并读取公开网页</text>
+  </g>
+</svg>

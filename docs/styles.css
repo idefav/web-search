@@ -36,6 +36,7 @@ nav .language-link { color: var(--accent-2); }
 .docs code { color: #d7ffe6; font: .9em ui-monospace, SFMono-Regular, Menlo, monospace; }
 .docs :not(pre) > code { padding: 2px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); }
 .docs blockquote { margin: 24px 0; padding: 2px 18px; border-left: 3px solid var(--accent-2); background: rgba(99, 216, 255, .06); }
+.docs img { display: block; max-width: 100%; height: auto; margin: 28px auto; border-radius: 12px; }
 .architecture-diagram { display: block; width: 100%; height: auto; margin: 24px 0; border: 1px solid var(--line); border-radius: 14px; background: #06100c; }
 .asciinema-demo { margin: 24px 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #15191e; }
 .docs table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; }

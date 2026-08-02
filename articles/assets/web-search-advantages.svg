@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2020" viewBox="0 0 1200 2020" role="img" aria-labelledby="title desc">
+  <title id="title">为什么选择 Camofox Web Search</title>
+  <desc id="desc">项目的六项核心优势</desc>
+  <rect width="1200" height="2020" rx="40" fill="#f8fcff"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="70" y="96" font-size="50" font-weight="800" fill="#102a43">为什么选择 Camofox Web Search？</text>
+    <text x="70" y="150" font-size="28" fill="#627d98">不是“又一个搜索插件”，而是一项可复用的 Agent 基础设施</text>
+    <g transform="translate(70 210)">
+      <rect width="1060" height="235" rx="30" fill="#ffffff" stroke="#38bdf8" stroke-width="5"/>
+      <circle cx="82" cy="82" r="42" fill="#e0f2fe"/><text x="82" y="97" text-anchor="middle" font-size="38" font-weight="800" fill="#0284c7">1</text>
+      <text x="155" y="77" font-size="40" font-weight="750" fill="#102a43">一处部署，所有 Agent 共用</text>
+      <text x="155" y="132" font-size="30" fill="#486581">MCP、REST、类型安全客户端与 CLI</text>
+      <text x="155" y="180" font-size="30" fill="#486581">让搜索策略、认证、升级和故障处理集中管理</text>
+    </g>
+    <g transform="translate(70 480)">
+      <rect width="1060" height="235" rx="30" fill="#ffffff" stroke="#14b8a6" stroke-width="5"/>
+      <circle cx="82" cy="82" r="42" fill="#ccfbf1"/><text x="82" y="97" text-anchor="middle" font-size="38" font-weight="800" fill="#0f766e">2</text>
+      <text x="155" y="77" font-size="40" font-weight="750" fill="#102a43">多 Provider 自动容错</text>
+      <text x="155" y="132" font-size="30" fill="#486581">DuckDuckGo、Brave、Bing、Google 可插拔、可排序</text>
+      <text x="155" y="180" font-size="30" fill="#486581">支持超时、冷却、能力判断、并发限制和自动回退</text>
+    </g>
+    <g transform="translate(70 750)">
+      <rect width="1060" height="235" rx="30" fill="#ffffff" stroke="#22c55e" stroke-width="5"/>
+      <circle cx="82" cy="82" r="42" fill="#dcfce7"/><text x="82" y="97" text-anchor="middle" font-size="38" font-weight="800" fill="#15803d">3</text>
+      <text x="155" y="77" font-size="40" font-weight="750" fill="#102a43">默认安全的最小工具面</text>
+      <text x="155" y="132" font-size="30" fill="#486581">只读工具、Bearer 认证、SSRF 防护与隔离出口</text>
+      <text x="155" y="180" font-size="30" fill="#486581">网页内容明确标记为不可信数据，不开放完整浏览器</text>
+    </g>
+    <g transform="translate(70 1020)">
+      <rect width="1060" height="235" rx="30" fill="#ffffff" stroke="#818cf8" stroke-width="5"/>
+      <circle cx="82" cy="82" r="42" fill="#e0e7ff"/><text x="82" y="97" text-anchor="middle" font-size="38" font-weight="800" fill="#4f46e5">4</text>
+      <text x="155" y="77" font-size="40" font-weight="750" fill="#102a43">固定上游版本与镜像 digest</text>
+      <text x="155" y="132" font-size="30" fill="#486581">浏览器运行时不会被 latest 标签悄悄替换</text>
+      <text x="155" y="180" font-size="30" fill="#486581">解析契约通过测试后再进行显式升级</text>
+    </g>
+    <g transform="translate(70 1290)">
+      <rect width="1060" height="235" rx="30" fill="#ffffff" stroke="#f59e0b" stroke-width="5"/>
+      <circle cx="82" cy="82" r="42" fill="#fef3c7"/><text x="82" y="97" text-anchor="middle" font-size="38" font-weight="800" fill="#b45309">5</text>
+      <text x="155" y="77" font-size="40" font-weight="750" fill="#102a43">为生产运维而设计</text>
+      <text x="155" y="132" font-size="30" fill="#486581">健康检查、结构化日志、Prometheus 和请求 ID</text>
+      <text x="155" y="180" font-size="30" fill="#486581">类型化错误、Provider 指标和真实 Docker E2E</text>
+    </g>
+    <g transform="translate(70 1560)">
+      <rect width="1060" height="235" rx="30" fill="#ffffff" stroke="#ec4899" stroke-width="5"/>
+      <circle cx="82" cy="82" r="42" fill="#fce7f3"/><text x="82" y="97" text-anchor="middle" font-size="38" font-weight="800" fill="#be185d">6</text>
+      <text x="155" y="77" font-size="40" font-weight="750" fill="#102a43">认真处理中文网页细节</text>
+      <text x="155" y="132" font-size="30" fill="#486581">识别微信公众号验证页、空白快照和 iframe 占位</text>
+      <text x="155" y="180" font-size="30" fill="#486581">有界等待；持续受阻时清晰返回 Retry-After</text>
+    </g>
+    <rect x="150" y="1860" width="900" height="95" rx="48" fill="#0ea5e9"/>
+    <text x="600" y="1920" text-anchor="middle" font-size="32" font-weight="750" fill="#ffffff">一次部署，让所有 Agent 都能搜索并读取公开网页</text>
+  </g>
+</svg>

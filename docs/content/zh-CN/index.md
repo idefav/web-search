@@ -6,6 +6,8 @@ Camofox Web Search 是一个可自托管、只读的 `web_search` 与 `web_fetch
 
 > GitHub Pages 只托管这份文档。真实服务需要部署在支持 Docker Compose 的 Linux 主机上。
 
+> 深度阅读：[《让 AI Agent 真正看见互联网：我们开源了 Camofox Web Search》](/zh-CN/article/)，了解 Agent Web Search 的完整能力、五种主流实现路线和项目设计取舍。
+
 ## 项目特色
 
 <div class="release-grid">

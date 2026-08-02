@@ -1,6 +1,6 @@
 # Camofox Web Search
 
-[English](./README.md) · [简体中文](./README.zh-CN.md) · [在线文档](https://idefav.github.io/web-search/zh-CN/)
+[English](./README.md) · [简体中文](./README.zh-CN.md) · [在线文档](https://idefav.github.io/web-search/zh-CN/) · [深度文章](https://idefav.github.io/web-search/zh-CN/article/)
 
 面向 Codex、Claude Code、OpenCode、Pi 与自定义 Agent 的自托管 `web_search`、`web_fetch` 服务。项目封装固定版本的 Camofox Browser REST API，不维护上游 Fork，同时提供带认证的 REST 和无状态 Streamable HTTP MCP。
 

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">让 AI Agent 真正看见互联网</title>
+  <desc id="desc">Camofox Web Search 项目推广文章横版封面</desc>
+  <defs>
+    <linearGradient id="fade" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.98"/>
+      <stop offset="0.42" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.7" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#f5fbff"/>
+  <image href="web-search-cover-background.png" width="1600" height="900" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1120" height="900" fill="url(#fade)"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="112" y="164" width="92" height="10" rx="5" fill="#14b8a6"/>
+    <text x="112" y="252" font-size="74" font-weight="800" fill="#102a43">让 AI Agent</text>
+    <text x="112" y="342" font-size="74" font-weight="800" fill="#102a43">真正看见互联网</text>
+    <text x="112" y="416" font-size="34" font-weight="600" fill="#147d92">我们开源了 Camofox Web Search</text>
+    <text x="112" y="488" font-size="24" fill="#486581">自托管 · 多 Provider 容错 · MCP / REST · 默认安全</text>
+    <rect x="112" y="550" width="240" height="58" rx="29" fill="#0ea5e9"/>
+    <text x="232" y="588" text-anchor="middle" font-size="24" font-weight="700" fill="#ffffff">OPEN SOURCE</text>
+  </g>
+</svg>

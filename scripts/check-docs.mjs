@@ -12,7 +12,7 @@ async function filesBelow(path) {
 }
 
 const htmlFiles = (await filesBelow(site)).filter((path) => path.endsWith(".html"));
-if (htmlFiles.length !== 9) throw new Error(`Expected 9 generated HTML pages, found ${htmlFiles.length}`);
+if (htmlFiles.length !== 10) throw new Error(`Expected 10 generated HTML pages, found ${htmlFiles.length}`);
 
 for (const path of htmlFiles) {
   const html = await readFile(path, "utf8");
@@ -33,6 +33,7 @@ for (const required of [
   "examples/deepagents/agent.py",
   "examples/deepagents/demo.cast",
   "examples/deepagents/model_provider.py",
+  "articles/web-search-for-ai-agents.md",
   "examples/agent-configs/codex.toml",
   "examples/agent-configs/claude.json",
   "examples/agent-configs/opencode.jsonc",

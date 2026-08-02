@@ -1,6 +1,6 @@
 # Camofox Web Search
 
-[English](./README.md) · [简体中文](./README.zh-CN.md) · [Documentation](https://idefav.github.io/web-search/en/)
+[English](./README.md) · [简体中文](./README.zh-CN.md) · [Documentation](https://idefav.github.io/web-search/en/) · [Long-form article (中文)](https://idefav.github.io/web-search/zh-CN/article/)
 
 A self-hosted, remote-first `web_search` and `web_fetch` service for Codex, Claude Code, OpenCode, Pi, and custom Agents. It wraps the pinned Camofox Browser REST API without maintaining a fork and exposes authenticated REST plus stateless Streamable HTTP MCP.
 

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1780" viewBox="0 0 1200 1780" role="img" aria-labelledby="title desc">
+  <title id="title">一次 Web Search 如何形成可信回答</title>
+  <desc id="desc">从发现、读取、筛选、综合到引用的五步流程</desc>
+  <rect width="1200" height="1780" rx="40" fill="#f8fcff"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="72" y="100" font-size="50" font-weight="800" fill="#102a43">一次 Web Search，如何形成可信回答？</text>
+    <text x="72" y="154" font-size="29" fill="#627d98">联网不是一次搜索调用，而是一条保留来源的完整链路</text>
+    <path d="M120 310 V1450" stroke="#9ddfd3" stroke-width="14" stroke-linecap="round"/>
+    <g transform="translate(70 220)">
+      <circle cx="50" cy="110" r="48" fill="#e0f2fe"/><text x="50" y="126" text-anchor="middle" font-size="42" font-weight="800" fill="#0284c7">1</text>
+      <rect x="130" width="930" height="220" rx="30" fill="#ffffff" stroke="#38bdf8" stroke-width="5"/>
+      <text x="185" y="76" font-size="44" font-weight="750" fill="#102a43">发现 <tspan font-size="34" fill="#0284c7">Search</tspan></text>
+      <text x="185" y="137" font-size="31" fill="#486581">找到标题、URL、摘要与排序</text>
+      <text x="185" y="180" font-size="27" fill="#829ab1">回答“哪些页面可能包含答案”</text>
+    </g>
+    <g transform="translate(70 490)">
+      <circle cx="50" cy="110" r="48" fill="#dcfce7"/><text x="50" y="126" text-anchor="middle" font-size="42" font-weight="800" fill="#16a34a">2</text>
+      <rect x="130" width="930" height="220" rx="30" fill="#ffffff" stroke="#22c55e" stroke-width="5"/>
+      <text x="185" y="76" font-size="44" font-weight="750" fill="#102a43">读取 <tspan font-size="34" fill="#16a34a">Fetch</tspan></text>
+      <text x="185" y="137" font-size="31" fill="#486581">渲染网页并提取真正的正文内容</text>
+      <text x="185" y="180" font-size="27" fill="#829ab1">避免只根据搜索摘要过度推断</text>
+    </g>
+    <g transform="translate(70 760)">
+      <circle cx="50" cy="110" r="48" fill="#ccfbf1"/><text x="50" y="126" text-anchor="middle" font-size="42" font-weight="800" fill="#0f766e">3</text>
+      <rect x="130" width="930" height="220" rx="30" fill="#ffffff" stroke="#14b8a6" stroke-width="5"/>
+      <text x="185" y="76" font-size="44" font-weight="750" fill="#102a43">筛选 <tspan font-size="34" fill="#0f766e">Select</tspan></text>
+      <text x="185" y="137" font-size="31" fill="#486581">检查时效、相关性、来源质量与多样性</text>
+      <text x="185" y="180" font-size="27" fill="#829ab1">优先保留可靠、互相独立的证据</text>
+    </g>
+    <g transform="translate(70 1030)">
+      <circle cx="50" cy="110" r="48" fill="#e0e7ff"/><text x="50" y="126" text-anchor="middle" font-size="42" font-weight="800" fill="#4f46e5">4</text>
+      <rect x="130" width="930" height="220" rx="30" fill="#ffffff" stroke="#6366f1" stroke-width="5"/>
+      <text x="185" y="76" font-size="44" font-weight="750" fill="#102a43">综合 <tspan font-size="34" fill="#4f46e5">Synthesize</tspan></text>
+      <text x="185" y="137" font-size="31" fill="#486581">比较多个来源，识别并处理冲突</text>
+      <text x="185" y="180" font-size="27" fill="#829ab1">让回答来自证据，而不是来自猜测</text>
+    </g>
+    <g transform="translate(70 1300)">
+      <circle cx="50" cy="110" r="48" fill="#fef3c7"/><text x="50" y="126" text-anchor="middle" font-size="42" font-weight="800" fill="#b45309">5</text>
+      <rect x="130" width="930" height="220" rx="30" fill="#ffffff" stroke="#f59e0b" stroke-width="5"/>
+      <text x="185" y="76" font-size="44" font-weight="750" fill="#102a43">引用 <tspan font-size="34" fill="#b45309">Cite</tspan></text>
+      <text x="185" y="137" font-size="31" fill="#486581">保留最终 URL，让读者可以回到原文核验</text>
+      <text x="185" y="180" font-size="27" fill="#829ab1">形成可追溯、可复查的回答</text>
+    </g>
+    <rect x="70" y="1600" width="1060" height="105" rx="28" fill="#e6fffa"/>
+    <text x="600" y="1666" text-anchor="middle" font-size="31" font-weight="700" fill="#0f766e">Search 负责发现，Fetch 负责取证，URL 让答案可验证</text>
+  </g>
+</svg>

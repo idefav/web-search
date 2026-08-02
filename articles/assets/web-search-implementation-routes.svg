@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1540" viewBox="0 0 1200 1540" role="img" aria-labelledby="title desc">
+  <title id="title">五种主流 Web Search 实现路线</title>
+  <desc id="desc">对比商业 API、模型内置搜索、元搜索、浏览器驱动和自建索引</desc>
+  <rect width="1200" height="1540" rx="40" fill="#f8fcff"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="76" y="96" font-size="48" font-weight="800" fill="#102a43">五种主流实现路线，没有万能答案</text>
+    <text x="76" y="146" font-size="25" fill="#627d98">选择取决于接入速度、控制力、运维成本和数据边界</text>
+    <g transform="translate(70 205)">
+      <rect width="1060" height="220" rx="28" fill="#ffffff" stroke="#38bdf8" stroke-width="4"/>
+      <circle cx="78" cy="72" r="42" fill="#e0f2fe"/><text x="78" y="84" text-anchor="middle" font-size="38">⚡</text>
+      <text x="145" y="62" font-size="40" font-weight="750" fill="#102a43">商业搜索 API</text>
+      <text x="145" y="108" font-size="28" fill="#486581">Brave Search、Tavily 等结构化托管服务</text>
+      <text x="145" y="164" font-size="29" font-weight="650" fill="#0284c7">接入最快 · 稳定性高 · 按量付费 · 供应商依赖</text>
+      <rect x="828" y="48" width="180" height="50" rx="25" fill="#e0f2fe"/><text x="918" y="81" text-anchor="middle" font-size="24" font-weight="700" fill="#0284c7">快速上线</text>
+    </g>
+    <g transform="translate(70 455)">
+      <rect width="1060" height="220" rx="28" fill="#ffffff" stroke="#818cf8" stroke-width="4"/>
+      <circle cx="78" cy="72" r="42" fill="#e0e7ff"/><text x="78" y="84" text-anchor="middle" font-size="38">✨</text>
+      <text x="145" y="62" font-size="40" font-weight="750" fill="#102a43">模型平台内置搜索</text>
+      <text x="145" y="108" font-size="28" fill="#486581">由模型平台负责搜索、选材、引用和工具编排</text>
+      <text x="145" y="164" font-size="29" font-weight="650" fill="#4f46e5">开发体验短 · 平台绑定 · 搜索策略与原始结果可控性较弱</text>
+      <rect x="828" y="48" width="180" height="50" rx="25" fill="#e0e7ff"/><text x="918" y="81" text-anchor="middle" font-size="24" font-weight="700" fill="#4f46e5">原生体验</text>
+    </g>
+    <g transform="translate(70 705)">
+      <rect width="1060" height="220" rx="28" fill="#ffffff" stroke="#14b8a6" stroke-width="4"/>
+      <circle cx="78" cy="72" r="42" fill="#ccfbf1"/><text x="78" y="84" text-anchor="middle" font-size="38">◎</text>
+      <text x="145" y="62" font-size="40" font-weight="750" fill="#102a43">元搜索</text>
+      <text x="145" y="108" font-size="28" fill="#486581">以 SearXNG 为代表，通过适配器聚合多个搜索上游</text>
+      <text x="145" y="164" font-size="29" font-weight="650" fill="#0f766e">自托管 · 来源多样 · 仍受上游限流与页面变化影响</text>
+      <rect x="828" y="48" width="180" height="50" rx="25" fill="#ccfbf1"/><text x="918" y="81" text-anchor="middle" font-size="24" font-weight="700" fill="#0f766e">聚合入口</text>
+    </g>
+    <g transform="translate(70 955)">
+      <rect width="1060" height="220" rx="28" fill="#ffffff" stroke="#22c55e" stroke-width="4"/>
+      <circle cx="78" cy="72" r="42" fill="#dcfce7"/><text x="78" y="84" text-anchor="middle" font-size="38">▣</text>
+      <text x="145" y="62" font-size="40" font-weight="750" fill="#102a43">浏览器驱动的搜索与抓取</text>
+      <text x="145" y="108" font-size="28" fill="#486581">以真实网页为接口，渲染 JavaScript 并读取页面内容</text>
+      <text x="145" y="164" font-size="29" font-weight="650" fill="#15803d">控制力高 · 无商业搜索 Key · 浏览器较重 · 需要运维</text>
+      <rect x="828" y="48" width="180" height="50" rx="25" fill="#dcfce7"/><text x="918" y="81" text-anchor="middle" font-size="24" font-weight="700" fill="#15803d">自主可控</text>
+    </g>
+    <g transform="translate(70 1205)">
+      <rect width="1060" height="220" rx="28" fill="#ffffff" stroke="#f59e0b" stroke-width="4"/>
+      <circle cx="78" cy="72" r="42" fill="#fef3c7"/><text x="78" y="84" text-anchor="middle" font-size="38">▤</text>
+      <text x="145" y="62" font-size="40" font-weight="750" fill="#102a43">自建爬虫与索引</text>
+      <text x="145" y="108" font-size="28" fill="#486581">自己负责抓取、更新、召回、排序和内容质量</text>
+      <text x="145" y="164" font-size="29" font-weight="650" fill="#b45309">控制力最高 · 成本最高 · 更适合内部或垂直语料</text>
+      <rect x="828" y="48" width="180" height="50" rx="25" fill="#fef3c7"/><text x="918" y="81" text-anchor="middle" font-size="24" font-weight="700" fill="#b45309">长期建设</text>
+    </g>
+  </g>
+</svg>
