@@ -32,17 +32,20 @@ search_code=$(curl -sS -o "$search_file" -w '%{http_code}' \
 # shellcheck disable=SC2016
 node -e '
   const fs=require("fs"); const status=Number(process.argv[1]); const x=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
-  if(status===200 && Array.isArray(x.results) && x.results.length>0) { console.log(`Live Google returned ${x.results.length} result(s)`); process.exit(0); }
-  if(status===503 && x.error?.code==="search_blocked") { console.log("Live Google was explicitly classified as search_blocked"); process.exit(0); }
+  if(status===200 && Array.isArray(x.results) && x.results.length>0 && typeof x.provider==="string") { console.log(`Live ${x.provider} returned ${x.results.length} result(s)`); process.exit(0); }
+  if(status>=500 && ["search_blocked","upstream_unavailable","upstream_timeout"].includes(x.error?.code)) { console.log(`Live provider chain returned typed ${x.error.code}`); process.exit(0); }
   console.error(x); process.exit(1);
 ' "$search_code" "$search_file"
 
 WEB_SEARCH_ENDPOINT="$endpoint" WEB_SEARCH_API_KEY="$api_key" node scripts/mcp-smoke.mjs
 
-for user_id in web-search-slot-1 web-search-slot-2 web-search-slot-3; do
-  tabs=$(docker compose -p "$compose_project" -f "$compose_file" exec -T camofox \
-    curl -fsS -H "authorization: Bearer $camofox_key" "http://127.0.0.1:9377/tabs?userId=$user_id")
-  node -e 'const x=JSON.parse(process.argv[1]); if(!Array.isArray(x.tabs)||x.tabs.length!==0) process.exit(1)' "$tabs"
+for provider in duckduckgo brave bing google; do
+  for slot in 1 2 3; do
+    user_id="web-search-$provider-slot-$slot"
+    tabs=$(docker compose -p "$compose_project" -f "$compose_file" exec -T camofox \
+      curl -fsS -H "authorization: Bearer $camofox_key" "http://127.0.0.1:9377/tabs?userId=$user_id")
+    node -e 'const x=JSON.parse(process.argv[1]); if(!Array.isArray(x.tabs)||x.tabs.length!==0) process.exit(1)' "$tabs"
+  done
 done
 
-echo "Docker REST, MCP, SSRF, live-search classification, and tab cleanup E2E passed"
+echo "Docker REST, MCP, SSRF, multi-provider live-search classification, and tab cleanup E2E passed"

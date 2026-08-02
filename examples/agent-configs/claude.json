@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "camofox_web": {
+      "type": "http",
+      "url": "https://search.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${WEB_SEARCH_API_KEY}"
+      }
+    }
+  }
+}

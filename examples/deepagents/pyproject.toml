@@ -1,0 +1,26 @@
+[project]
+name = "camofox-web-search-deepagents-example"
+version = "0.0.0"
+description = "Custom LangChain Deep Agents research Agent using Camofox Web Search"
+requires-python = ">=3.11,<4"
+dependencies = [
+  "deepagents>=0.7,<0.8",
+  "httpx>=0.28,<0.29",
+  "langchain-mcp-adapters>=0.3,<0.4",
+  "langchain-openai>=1.4,<2",
+  "mcp>=1.23,<2",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9,<10",
+  "pytest-asyncio>=1.3,<2",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.uv]
+package = false

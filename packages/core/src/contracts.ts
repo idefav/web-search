@@ -23,7 +23,7 @@ export const searchResultSchema = z.object({
 export const searchResponseSchema = z.object({
   request_id: z.string(),
   query: z.string(),
-  provider: z.literal("google"),
+  provider: z.string().min(1),
   fetched_at: z.string(),
   results: z.array(searchResultSchema),
   warnings: z.array(z.string())
@@ -73,5 +73,6 @@ export interface ErrorResponse {
     code: ErrorCode;
     message: string;
     retryable: boolean;
+    retry_after_seconds?: number;
   };
 }

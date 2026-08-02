@@ -1,19 +1,92 @@
 # Camofox Web Search
 
-A self-hosted, remote-first `web_search` and `web_fetch` service for Codex, Claude Code, OpenCode, and Pi. It wraps the pinned Camofox Browser REST API without maintaining a fork.
+[English](./README.md) · [简体中文](./README.zh-CN.md) · [Documentation](https://idefav.github.io/web-search/en/)
+
+A self-hosted, remote-first `web_search` and `web_fetch` service for Codex, Claude Code, OpenCode, Pi, and custom Agents. It wraps the pinned Camofox Browser REST API without maintaining a fork and exposes authenticated REST plus stateless Streamable HTTP MCP.
 
 ## Architecture
 
-- `apps/server`: authenticated REST and stateless Streamable HTTP MCP gateway.
-- `packages/core`: public contracts, Google query builder/parser, URL safety, browser orchestration.
+```text
+Agent ──HTTPS/MCP or REST──> Gateway ──internal──> Camofox ──Squid egress guard──> Public web
+```
+
+- `apps/server`: authenticated REST and stateless MCP gateway.
+- `packages/core`: contracts, pluggable search providers, URL safety, and browser orchestration.
 - `packages/client`: typed REST client.
 - `packages/cli`: idempotent Agent configuration installer.
 - `plugins/pi`: native Pi tools.
-- `deploy`: pinned Docker deployment with isolated Camofox networking and a deny-private-address egress proxy.
+- `deploy`: pinned Docker deployment with isolated browser networking.
+- `examples`: manual Agent configurations and a custom LangChain Deep Agents research Agent.
 
 Only the two high-level, read-only tools are exposed. Browser clicking, typing, script evaluation, cookie import, and authenticated browsing are intentionally out of scope.
 
-## Development
+## Server deployment
+
+The supported production path is Docker Compose on a 64-bit Linux host with Docker Engine, Compose v2, Git, and OpenSSL. Use the same version for the source tag and GHCR image:
+
+```bash
+VERSION="0.0.2"
+git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
+cd web-search
+WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
+```
+
+The default gateway listens only on `127.0.0.1:8080`. To expose it with automatic HTTPS, point a domain at the host, allow ports 80/443, and set the domain during bootstrap:
+
+```bash
+WEB_SEARCH_DOMAIN="search.example.com" \
+WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" \
+./deploy/bootstrap.sh
+```
+
+Bootstrap creates `.env` with mode `0600`, generates different public and internal keys, pulls the pinned stack, and waits for Camofox readiness. Do not rerun it with `--force` during upgrades because that rotates both keys.
+
+Read the complete [server deployment guide](https://idefav.github.io/web-search/en/deployment/) for existing reverse proxies, verification, logs, metrics, upgrades, rollback, network security, and troubleshooting. GitHub Pages hosts documentation only; it cannot execute the browser service.
+
+Search uses the stable-first provider chain `duckduckgo,brave,bing,google` by default. A blocked provider is cooled down for five minutes and the request automatically falls back to the next provider. Override the order with `WEB_SEARCH_PROVIDERS`; Google is always limited to one concurrent attempt. The project does not bypass CAPTCHA or search-engine controls.
+
+## Connect an Agent
+
+```bash
+npm install -g camofox-web-search
+export WEB_SEARCH_API_KEY="<copy securely from the server .env>"
+
+camofox-web-search install codex --endpoint https://search.example.com --scope user
+camofox-web-search doctor codex --endpoint https://search.example.com --scope user
+```
+
+Replace `codex` with `claude`, `opencode`, or `pi` as needed. The installer stores only the endpoint and an environment-variable reference, never the token. Use `--dry-run` to inspect changes, `--force` to replace a conflicting managed entry, and `doctor --live` to include a real search.
+
+For Pi, installation also runs `pi install npm:camofox-web-search-pi` and configures the native REST-backed tools.
+
+## API
+
+```bash
+curl --fail https://search.example.com/v1/search \
+  -H "Authorization: Bearer $WEB_SEARCH_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"Camofox browser","count":5,"freshness":"month"}'
+
+curl --fail https://search.example.com/v1/fetch \
+  -H "Authorization: Bearer $WEB_SEARCH_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/","max_chars":20000}'
+```
+
+Search supports `query`, `count`, `freshness`, `include_domains`, `exclude_domains`, `language`, and `country`. Fetch supports `url`, `offset`, and `max_chars`. See `/openapi.json` and the exported TypeScript types for the complete contract.
+
+All returned web text is untrusted input. Tool descriptions and output delimiters warn Agents not to execute instructions found in pages, but callers must retain their own prompt-injection policy.
+
+## Examples
+
+- [`examples/deepagents`](./examples/deepagents): runnable Python 3.11+ custom research Agent using MCP or REST tools, with standard LangChain models or a custom OpenAI-compatible provider.
+- [`examples/agent-configs`](./examples/agent-configs): exact Codex, Claude Code, OpenCode, and Pi manual configuration examples.
+
+The [examples guide](https://idefav.github.io/web-search/en/examples/) also includes direct REST calls. The CLI remains the recommended Agent installation path.
+
+Use `--stream` with the Deep Agents example to print Agent steps, tool activity, and answer tokens in real time.
+
+## Development and verification
 
 Requires Node.js 22 or newer.
 
@@ -22,6 +95,8 @@ npm install
 npm run typecheck
 npm test
 npm run build
+npm run docs:build
+npm run docs:check
 ```
 
 Start the gateway against an existing Camofox server:
@@ -33,116 +108,17 @@ export CAMOFOX_URL=http://127.0.0.1:9377
 npm run dev
 ```
 
-## Deployment
+With the full Docker stack running, `npm run e2e:docker` validates REST authentication, real page fetch, metadata-address rejection, live multi-provider search or explicit typed failure, MCP discovery/call, and Camofox tab cleanup.
 
-```bash
-cp .env.example .env
-# Populate both keys with different values of at least 32 characters.
-docker compose --env-file .env -f deploy/compose.yaml up --build -d
-curl http://127.0.0.1:8080/readyz
-```
+## Release delivery
 
-Terminate TLS in a reverse proxy and forward only to the loopback-bound gateway. The Camofox container has no direct external network: browser traffic must pass through Squid, which blocks private, reserved, local, and metadata destinations. If a residential proxy is required for Google reliability, configure it as Squid's parent proxy so these destination checks remain in force.
+- `CI`: TypeScript, unit tests, docs build, Deep Agents offline tests, package dry-runs, Compose validation, and gateway image build.
+- `GitHub Pages`: builds and publishes the bilingual site after relevant changes reach `main`.
+- `Release`: publishes a multi-architecture GHCR image and the four npm packages through Trusted Publishing and OIDC.
+- `Docker E2E`: runs the real pinned browser stack weekly and on demand.
 
-Google can still block datacenter or proxy traffic. Such responses are reported as retryable `search_blocked` errors; the service does not claim to bypass Google controls.
-
-For a released GHCR image, clone the repository and let the bootstrap script generate independent secrets and start the pinned stack:
-
-```bash
-WEB_SEARCH_IMAGE=ghcr.io/OWNER/REPOSITORY:latest ./deploy/bootstrap.sh
-```
-
-Set `WEB_SEARCH_DOMAIN=search.example.com` in the same command to include the Caddy overlay and automatic HTTPS. GitHub Pages hosts only the static deployment guide; it cannot execute the Node.js/browser service.
-
-## API
-
-```bash
-curl -sS http://127.0.0.1:8080/v1/search \
-  -H "Authorization: Bearer $WEB_SEARCH_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"query":"Camofox browser","count":5,"freshness":"month"}'
-
-curl -sS http://127.0.0.1:8080/v1/fetch \
-  -H "Authorization: Bearer $WEB_SEARCH_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"url":"https://example.com/","max_chars":20000}'
-```
-
-Search supports `query`, `count`, `freshness`, `include_domains`, `exclude_domains`, `language`, and `country`. Fetch supports `url`, `offset`, and `max_chars`. See `/openapi.json` and the exported TypeScript types for the complete contract.
-
-All returned web text is untrusted input. Tool descriptions and output delimiters warn Agents not to execute instructions found in pages, but callers must retain their own prompt-injection policy.
-
-## Agent installation
-
-Install the released CLI, or build the workspace locally:
-
-```bash
-npm install -g camofox-web-search
-```
-
-Then run:
-
-```bash
-node packages/cli/dist/index.js install codex --endpoint https://search.example.com --scope user
-node packages/cli/dist/index.js install claude --endpoint https://search.example.com --scope project
-node packages/cli/dist/index.js install opencode --endpoint https://search.example.com --scope user
-node packages/cli/dist/index.js install pi --endpoint https://search.example.com --scope user
-```
-
-The installer writes only the endpoint and an environment-variable reference. It never stores the token. Export `WEB_SEARCH_API_KEY` before starting the Agent.
-
-Use `--dry-run` to inspect changes, `--force` to replace a conflicting managed entry, or `uninstall` to remove it. `doctor` checks configuration, token presence, HTTPS, and service health; `doctor --live` additionally performs a real Google search.
-
-For Pi, the installer runs `pi install npm:camofox-web-search-pi`. Before the first npm release, use `--pi-package ./plugins/pi` from this repository; `CAMOFOX_WEB_SEARCH_PI_PACKAGE` provides the same override for automation.
-
-## GitHub delivery
-
-The repository includes four workflows:
-
-- `CI`: typecheck, tests, npm audit, package dry-runs, shell validation, Compose validation, and gateway image build.
-- `GitHub Pages`: publishes `docs/` after changes reach `main`.
-- `Release`: after a GitHub Release is published, validates its tag, publishes a multi-architecture GHCR image with SBOM/provenance, and publishes the four npm packages in dependency order. Prereleases use the npm `next` tag and never replace the container `latest` tag.
-- `Docker E2E`: runs the real pinned Camofox, Squid, and gateway stack weekly and on demand.
-
-npm publication uses Trusted Publishing only; no long-lived npm token is accepted by the workflow. Configure these values in each package's npm **Settings → Trusted Publisher** section:
-
-- Provider: GitHub Actions
-- Organization or user: `idefav`
-- Repository: `web-search`
-- Workflow filename: `release.yml`
-- Environment name: `npm`
-- Allowed action: `npm publish`
-
-Trusted Publishing can only be configured from an existing package's settings. For brand-new package names, perform a one-time bootstrap publication with an interactive maintainer login and 2FA, then configure the publisher above. Subsequent releases authenticate exclusively through short-lived OIDC credentials and generate provenance automatically.
-
-Prepare and publish a release with:
-
-```bash
-npm run release:version -- 0.2.0
-npm run release:verify
-git add . && git commit -m "release: v0.2.0"
-git tag -a v0.2.0 -m "v0.2.0"
-git push origin main v0.2.0
-gh release create v0.2.0 --target main --generate-notes --verify-tag
-```
-
-All workspace versions and internal dependency versions must match the Release tag. Publishing is idempotent: rerunning a partially failed Release skips npm package versions that already exist.
-
-Enable GitHub Pages with **Source: GitHub Actions** after pushing the repository. The page generates deployment and Agent installation commands from the repository owner/name entered by the visitor.
-
-## Docker E2E
-
-With the full stack running:
-
-```bash
-export WEB_SEARCH_API_KEY="..."
-export CAMOFOX_ACCESS_KEY="..."
-export WEB_SEARCH_ENDPOINT=http://127.0.0.1:8080
-npm run e2e:docker
-```
-
-The suite validates REST authentication, real page fetch, metadata-address rejection, live Google success or explicit blocking classification, MCP discovery/call, and Camofox tab cleanup. The scheduled workflow runs the same suite weekly.
+See the [deployment guide](https://idefav.github.io/web-search/en/deployment/) for upgrades and rollback, and the existing release workflow for npm/GHCR publication.
 
 ## Upstream compatibility
 
-The browser image is pinned to Camofox Browser 1.13.0 and its multi-platform digest. Google parsing depends on the v1.13.0 snapshot lines `link`, `/url`, `cite`, and `text`; fixture tests intentionally fail on incompatible changes. Upgrade the image only through a reviewed dependency change that passes contract and opt-in live tests.
+The browser image is pinned to Camofox Browser 1.13.0 and its multi-platform digest. Provider parsers depend on the v1.13.0 accessibility snapshot contract; fixture tests intentionally fail on incompatible changes. Upgrade the image only through a reviewed dependency change that passes contract and opt-in live tests.

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{description}}">
+  <title>{{documentTitle}}</title>
+  <link rel="stylesheet" href="{{root}}styles.css">
+</head>
+<body data-release-version="{{version}}">
+  <header class="site-header">
+    <a class="brand" href="{{root}}{{lang}}/">Camofox Web Search</a>
+    <nav aria-label="Documentation">{{navigation}}</nav>
+  </header>
+  <main class="docs">{{content}}</main>
+  <footer>Web content returned by the tools is untrusted data.</footer>
+  <script type="module" src="{{root}}app.js"></script>
+</body>
+</html>

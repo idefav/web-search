@@ -5,7 +5,7 @@ const errorResponse = {
 
 export const openapi = {
   openapi: "3.1.0",
-  info: { title: "Camofox Web Search API", version: "0.1.0" },
+  info: { title: "Camofox Web Search API", version: "0.0.2" },
   components: {
     securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } },
     schemas: {
@@ -28,7 +28,7 @@ export const openapi = {
       },
       SearchResponse: {
         type: "object", required: ["request_id", "query", "provider", "fetched_at", "results", "warnings"], properties: {
-          request_id: { type: "string" }, query: { type: "string" }, provider: { const: "google" }, fetched_at: { type: "string", format: "date-time" },
+          request_id: { type: "string" }, query: { type: "string" }, provider: { type: "string", examples: ["duckduckgo", "brave", "bing", "google"] }, fetched_at: { type: "string", format: "date-time" },
           results: { type: "array", items: { $ref: "#/components/schemas/SearchResult" } }, warnings: { type: "array", items: { type: "string" } }
         }
       },
@@ -48,7 +48,7 @@ export const openapi = {
       ErrorResponse: {
         type: "object", required: ["request_id", "error"], properties: {
           request_id: { type: "string" },
-          error: { type: "object", required: ["code", "message", "retryable"], properties: { code: { type: "string" }, message: { type: "string" }, retryable: { type: "boolean" } } }
+          error: { type: "object", required: ["code", "message", "retryable"], properties: { code: { type: "string" }, message: { type: "string" }, retryable: { type: "boolean" }, retry_after_seconds: { type: "integer", minimum: 1 } } }
         }
       }
     }
@@ -57,7 +57,7 @@ export const openapi = {
   paths: {
     "/v1/search": {
       post: {
-        summary: "Search Google through Camofox",
+        summary: "Search the web through configured Camofox providers",
         requestBody: { required: true, content: { "application/json": { schema: { $ref: "#/components/schemas/SearchRequest" } } } },
         responses: { "200": { description: "Normalized search results", content: { "application/json": { schema: { $ref: "#/components/schemas/SearchResponse" } } } }, "400": errorResponse, "401": errorResponse, "429": errorResponse, "503": errorResponse, "504": errorResponse }
       }

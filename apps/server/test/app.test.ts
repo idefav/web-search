@@ -18,6 +18,9 @@ const config: ServerConfig = {
   maxQueue: 20,
   queueTimeoutMs: 5_000,
   operationTimeoutMs: 45_000,
+  providerTimeoutMs: 15_000,
+  providerCooldownMs: 300_000,
+  providers: ["google"],
   rateLimitPerMinute: 60
 };
 
@@ -81,5 +84,28 @@ describe("gateway", () => {
     expect(result.isError).not.toBe(true);
     expect(result.structuredContent).toMatchObject({ provider: "google", results: [{ title: "MCP" }] });
     await transport.close();
+  });
+
+  it("returns retry guidance when every provider is blocked", async () => {
+    const upstream = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.endsWith("/tabs")) return json({ tabId: "blocked-tab", url: "about:blank" });
+      if (url.includes("/navigate")) return json({ ok: true, tabId: "blocked-tab", url: "https://www.google.com/search?q=test" });
+      if (url.includes("/snapshot")) return json({ url: "https://www.google.com/sorry/index", snapshot: "Our systems have detected unusual traffic", totalChars: 48 });
+      return json({ ok: true });
+    });
+    const endpoint = await start(upstream as typeof fetch);
+    const response = await fetch(`${endpoint}/v1/search`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${config.publicKey}` },
+      body: JSON.stringify({ query: "test" })
+    });
+    expect(response.status).toBe(503);
+    expect(response.headers.get("retry-after")).toBe("300");
+    await expect(response.json()).resolves.toMatchObject({ error: { code: "search_blocked", retry_after_seconds: 300 } });
+    const metrics = await fetch(`${endpoint}/metrics`, { headers: { authorization: `Bearer ${config.publicKey}` } });
+    const text = await metrics.text();
+    expect(text).toContain('camofox_web_search_provider_attempts_total{provider="google",outcome="blocked"} 1');
+    expect(text).toContain('camofox_web_search_provider_circuit_open{provider="google"} 1');
   });
 });

@@ -22,6 +22,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: npm run docs:build
+      - run: npm run docs:check
       - run: npm audit
       - run: node scripts/verify-release.mjs
       - name: Verify npm package contents
@@ -39,3 +41,20 @@ jobs:
         run: docker compose -f deploy/compose.yaml config --quiet
       - name: Build gateway image
         run: docker build -f deploy/Dockerfile .
+
+  deepagents-example:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: examples/deepagents
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v9
+        with:
+          python-version: "3.11"
+          enable-cache: true
+          cache-dependency-glob: examples/deepagents/uv.lock
+      - run: uv sync --locked
+      - run: uv run python -m compileall -q agent.py model_provider.py settings.py web_search_tools.py
+      - run: uv run pytest

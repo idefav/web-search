@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search-monorepo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -19,6 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b --pretty false",
+    "docs:build": "node scripts/build-docs.mjs",
+    "docs:check": "node scripts/check-docs.mjs",
     "release:version": "node scripts/set-version.mjs",
     "release:verify": "node scripts/verify-release.mjs",
     "e2e:docker": "scripts/docker-e2e.sh"
@@ -28,6 +30,7 @@
     "@types/node": "24.10.4",
     "tsx": "4.23.1",
     "typescript": "5.9.3",
+    "marked": "18.0.7",
     "vitest": "4.1.10"
   }
 }

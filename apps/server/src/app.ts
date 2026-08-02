@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import {
   asWebToolError,
   CamofoxClient,
+  createBuiltinSearchProviders,
   fetchRequestSchema,
   searchRequestSchema,
   WebSearchService,
@@ -16,15 +17,31 @@ import { openapi } from "./openapi.js";
 
 export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch) {
   const camofox = new CamofoxClient(config.camofoxUrl, config.camofoxAccessKey, fetchImpl);
+  const requestCounts = new Map<string, number>();
+  const durationSums = new Map<string, number>();
+  const providerAttempts = new Map<string, number>();
+  const providerDurationSums = new Map<string, number>();
+  const providerFallbacks = new Map<string, number>();
   const service = new WebSearchService(camofox, {
     concurrency: config.concurrency,
     maxQueue: config.maxQueue,
     queueTimeoutMs: config.queueTimeoutMs,
-    operationTimeoutMs: config.operationTimeoutMs
+    operationTimeoutMs: config.operationTimeoutMs,
+    providerTimeoutMs: config.providerTimeoutMs,
+    providerCooldownMs: config.providerCooldownMs,
+    providers: createBuiltinSearchProviders(config.providers),
+    onProviderAttempt: (event) => {
+      const key = `${event.provider}|${event.outcome}`;
+      providerAttempts.set(key, (providerAttempts.get(key) ?? 0) + 1);
+      providerDurationSums.set(key, (providerDurationSums.get(key) ?? 0) + event.durationMs / 1_000);
+      process.stdout.write(`${JSON.stringify({ level: "info", message: "search_provider_attempt", request_id: event.requestId, provider: event.provider, outcome: event.outcome, duration_ms: event.durationMs })}\n`);
+    },
+    onProviderFallback: (event) => {
+      const key = `${event.from}|${event.to}`;
+      providerFallbacks.set(key, (providerFallbacks.get(key) ?? 0) + 1);
+    }
   });
   const app = express();
-  const requestCounts = new Map<string, number>();
-  const durationSums = new Map<string, number>();
 
   const requestSignal = (request: express.Request): AbortSignal => {
     const controller = new AbortController();
@@ -75,7 +92,28 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
       ...[...durationSums.entries()].map(([key, value]) => {
         const [method, path, status] = key.split("|");
         return `camofox_web_search_http_request_duration_seconds_sum{method="${method}",path="${path}",status="${status}"} ${value}`;
-      })
+      }),
+      "# HELP camofox_web_search_provider_attempts_total Search provider attempts by outcome.",
+      "# TYPE camofox_web_search_provider_attempts_total counter",
+      ...[...providerAttempts.entries()].map(([key, value]) => {
+        const [provider, outcome] = key.split("|");
+        return `camofox_web_search_provider_attempts_total{provider="${provider}",outcome="${outcome}"} ${value}`;
+      }),
+      "# HELP camofox_web_search_provider_attempt_duration_seconds_sum Total provider attempt duration.",
+      "# TYPE camofox_web_search_provider_attempt_duration_seconds_sum counter",
+      ...[...providerDurationSums.entries()].map(([key, value]) => {
+        const [provider, outcome] = key.split("|");
+        return `camofox_web_search_provider_attempt_duration_seconds_sum{provider="${provider}",outcome="${outcome}"} ${value}`;
+      }),
+      "# HELP camofox_web_search_provider_fallbacks_total Successful provider fallbacks.",
+      "# TYPE camofox_web_search_provider_fallbacks_total counter",
+      ...[...providerFallbacks.entries()].map(([key, value]) => {
+        const [from, to] = key.split("|");
+        return `camofox_web_search_provider_fallbacks_total{from="${from}",to="${to}"} ${value}`;
+      }),
+      "# HELP camofox_web_search_provider_circuit_open Whether a provider cooldown circuit is open.",
+      "# TYPE camofox_web_search_provider_circuit_open gauge",
+      ...service.providerCircuitStates().map((state) => `camofox_web_search_provider_circuit_open{provider="${state.provider}"} ${state.open ? 1 : 0}`)
     ];
     response.type("text/plain; version=0.0.4").send(`${lines.join("\n")}\n`);
   });
@@ -99,6 +137,7 @@ export function createApp(config: ServerConfig, fetchImpl: typeof fetch = fetch)
     const mapped = error instanceof ZodError
       ? new WebToolError("invalid_input", error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; "))
       : asWebToolError(error);
+    if (mapped.retryAfterSeconds !== undefined) response.setHeader("retry-after", String(mapped.retryAfterSeconds));
     response.status(mapped.status).json(mapped.toResponse(response.locals.requestId));
   };
   app.use(errors);

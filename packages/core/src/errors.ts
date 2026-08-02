@@ -18,7 +18,8 @@ export class WebToolError extends Error {
     message: string,
     public readonly retryable = false,
     public readonly status = statusByCode[code],
-    public readonly cause?: unknown
+    public readonly cause?: unknown,
+    public readonly retryAfterSeconds?: number
   ) {
     super(message);
     this.name = "WebToolError";
@@ -27,7 +28,12 @@ export class WebToolError extends Error {
   toResponse(requestId: string): ErrorResponse {
     return {
       request_id: requestId,
-      error: { code: this.code, message: this.message, retryable: this.retryable }
+      error: {
+        code: this.code,
+        message: this.message,
+        retryable: this.retryable,
+        ...(this.retryAfterSeconds !== undefined ? { retry_after_seconds: this.retryAfterSeconds } : {})
+      }
     };
   }
 }

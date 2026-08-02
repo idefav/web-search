@@ -1,32 +1,58 @@
+const languageLinks = document.querySelectorAll("[data-language]");
+for (const link of languageLinks) {
+  link.addEventListener("click", () => localStorage.setItem("docs-language", link.dataset.language));
+}
+
+if (document.body.classList.contains("language-home")) {
+  const saved = localStorage.getItem("docs-language");
+  const language = saved ?? (navigator.language.toLowerCase().startsWith("zh") ? "zh-CN" : "en");
+  location.replace(new URL(`${language}/`, location.href));
+}
+
 const ownerInput = document.querySelector("#owner");
 const repoInput = document.querySelector("#repo");
 const domainInput = document.querySelector("#domain");
+const versionInput = document.querySelector("#version");
 const deployCommand = document.querySelector("#deploy-command");
 const agentCommand = document.querySelector("#agent-command");
 
-if (location.hostname.endsWith(".github.io")) {
+if (ownerInput && repoInput && location.hostname.endsWith(".github.io")) {
   ownerInput.value = location.hostname.slice(0, -".github.io".length);
   repoInput.value = location.pathname.split("/").filter(Boolean)[0] || "web-search";
 }
 
-function render() {
-  const owner = ownerInput.value.trim() || "OWNER";
-  const repo = repoInput.value.trim() || "REPO";
-  const domain = domainInput.value.trim();
+function renderCommands() {
+  if (!ownerInput || !repoInput || !deployCommand || !agentCommand) return;
+  const owner = ownerInput.value.trim() || "idefav";
+  const repo = repoInput.value.trim() || "web-search";
+  const domain = domainInput?.value.trim() ?? "";
+  const version = versionInput?.value.trim() || document.body.dataset.releaseVersion || "0.0.2";
   const endpoint = domain ? `https://${domain}` : "http://127.0.0.1:8080";
-  const domainPrefix = domain ? `WEB_SEARCH_DOMAIN=${domain} ` : "";
-  deployCommand.textContent = `git clone https://github.com/${owner}/${repo}.git\ncd ${repo}\n${domainPrefix}WEB_SEARCH_IMAGE=ghcr.io/${owner}/${repo}:latest ./deploy/bootstrap.sh`;
-  agentCommand.textContent = `export WEB_SEARCH_API_KEY=\"<从服务器 .env 安全复制>\"\ncamofox-web-search install codex --endpoint ${endpoint} --scope user\ncamofox-web-search doctor codex --endpoint ${endpoint} --scope user`;
+  const deploymentEnvironment = domain ? `WEB_SEARCH_DOMAIN=${JSON.stringify(domain)} ` : "";
+  deployCommand.textContent = [
+    `VERSION=${JSON.stringify(version)}`,
+    `git clone --branch "v\${VERSION}" --depth 1 https://github.com/${owner}/${repo}.git`,
+    `cd ${repo}`,
+    `${deploymentEnvironment}WEB_SEARCH_IMAGE="ghcr.io/${owner}/${repo}:\${VERSION}" ./deploy/bootstrap.sh`
+  ].join("\n");
+  agentCommand.textContent = [
+    "export WEB_SEARCH_API_KEY=\"<copy securely from the server .env>\"",
+    `camofox-web-search install codex --endpoint ${endpoint} --scope user`,
+    `camofox-web-search doctor codex --endpoint ${endpoint} --scope user`
+  ].join("\n");
 }
 
-for (const input of [ownerInput, repoInput, domainInput]) input.addEventListener("input", render);
+for (const input of [ownerInput, repoInput, domainInput, versionInput].filter(Boolean)) input.addEventListener("input", renderCommands);
+
 for (const button of document.querySelectorAll("[data-copy]")) {
   button.addEventListener("click", async () => {
     const target = document.querySelector(`#${button.dataset.copy}`);
+    if (!target) return;
     await navigator.clipboard.writeText(target.textContent);
     const previous = button.textContent;
-    button.textContent = "已复制";
+    button.textContent = document.documentElement.lang === "zh-CN" ? "已复制" : "Copied";
     setTimeout(() => { button.textContent = previous; }, 1200);
   });
 }
-render();
+
+renderCommands();

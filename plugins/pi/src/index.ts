@@ -61,7 +61,9 @@ export default function register(pi: ExtensionAPI): void {
       }, signal);
       const text = [
         `UNTRUSTED WEB SEARCH RESULTS for: ${result.query}`,
-        ...result.results.map((item) => `${item.rank}. ${item.title}\n   ${item.url}${item.snippet ? `\n   ${item.snippet}` : ""}`)
+        `Provider: ${result.provider}`,
+        ...result.results.map((item) => `${item.rank}. ${item.title}\n   ${item.url}${item.snippet ? `\n   ${item.snippet}` : ""}`),
+        ...(result.warnings.length ? [`Warnings: ${result.warnings.join(", ")}`] : [])
       ].join("\n");
       return { content: [{ type: "text", text }], details: result };
     }

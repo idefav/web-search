@@ -1,0 +1,5 @@
+# BEGIN camofox-web-search
+[mcp_servers.camofox_web]
+url = "https://search.example.com/mcp"
+bearer_token_env_var = "WEB_SEARCH_API_KEY"
+# END camofox-web-search

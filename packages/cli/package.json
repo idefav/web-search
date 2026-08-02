@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Install and diagnose camofox-web-search for Codex, Claude Code, OpenCode, and Pi",
   "license": "MIT",
   "repository": {

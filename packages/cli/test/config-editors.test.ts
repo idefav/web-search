@@ -1,7 +1,8 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { parse } from "jsonc-parser";
 import { updateTarget } from "../src/config-editors.js";
 
 const temporary: string[] = [];
@@ -45,5 +46,24 @@ describe("agent config installers", () => {
     expect(content).toContain("// keep this");
     expect(content).toContain('"servers"');
     expect(content).toContain('Bearer {env:WEB_SEARCH_API_KEY}');
+  });
+
+  it("keeps checked-in manual examples aligned with generated project configuration", async () => {
+    const cwd = await workspace();
+    const endpoint = "https://search.example.com";
+    const base = { scope: "project" as const, endpoint, cwd, force: false, dryRun: false };
+    await updateTarget({ ...base, target: "codex" });
+    await updateTarget({ ...base, target: "claude" });
+    await updateTarget({ ...base, target: "opencode" });
+
+    const examples = resolve(process.cwd(), "examples", "agent-configs");
+    expect(await readFile(join(cwd, ".codex", "config.toml"), "utf8"))
+      .toBe(await readFile(join(examples, "codex.toml"), "utf8"));
+    expect(JSON.parse(await readFile(join(cwd, ".mcp.json"), "utf8")))
+      .toEqual(JSON.parse(await readFile(join(examples, "claude.json"), "utf8")));
+    expect(parse(await readFile(join(cwd, "opencode.jsonc"), "utf8")))
+      .toEqual(parse(await readFile(join(examples, "opencode.jsonc"), "utf8")));
+    expect(JSON.parse(await readFile(join(examples, "pi.json"), "utf8")))
+      .toEqual({ endpoint });
   });
 });

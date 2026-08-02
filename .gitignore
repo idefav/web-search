@@ -5,3 +5,7 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 *.backup-*
+.pages/
+__pycache__/
+.pytest_cache/
+.venv/

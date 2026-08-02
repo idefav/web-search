@@ -22,7 +22,8 @@ export class WebSearchClientError extends Error {
     message: string,
     public readonly retryable: boolean,
     public readonly requestId?: string,
-    public readonly status?: number
+    public readonly status?: number,
+    public readonly retryAfterSeconds?: number
   ) {
     super(message);
     this.name = "WebSearchClientError";
@@ -55,13 +56,14 @@ export class WebSearchClient {
     });
     const body: unknown = await response.json().catch(() => undefined);
     if (!response.ok) {
-      const envelope = body as { request_id?: string; error?: { code?: ErrorCode; message?: string; retryable?: boolean } } | undefined;
+      const envelope = body as { request_id?: string; error?: { code?: ErrorCode; message?: string; retryable?: boolean; retry_after_seconds?: number } } | undefined;
       throw new WebSearchClientError(
         envelope?.error?.code ?? "invalid_response",
         envelope?.error?.message ?? `Server returned HTTP ${response.status}`,
         envelope?.error?.retryable ?? response.status >= 500,
         envelope?.request_id,
-        response.status
+        response.status,
+        envelope?.error?.retry_after_seconds
       );
     }
     try {

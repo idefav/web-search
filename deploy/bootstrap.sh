@@ -34,6 +34,9 @@ internal_key=$(openssl rand -hex 32)
   printf 'CAMOFOX_ACCESS_KEY=%s\n' "$internal_key"
   printf 'WEB_SEARCH_IMAGE=%s\n' "$WEB_SEARCH_IMAGE"
   printf 'WEB_SEARCH_PORT=%s\n' "${WEB_SEARCH_PORT:-8080}"
+  printf 'WEB_SEARCH_PROVIDERS=%s\n' "${WEB_SEARCH_PROVIDERS:-duckduckgo,brave,bing,google}"
+  printf 'WEB_SEARCH_PROVIDER_TIMEOUT_MS=%s\n' "${WEB_SEARCH_PROVIDER_TIMEOUT_MS:-15000}"
+  printf 'WEB_SEARCH_PROVIDER_COOLDOWN_MS=%s\n' "${WEB_SEARCH_PROVIDER_COOLDOWN_MS:-300000}"
   if [ -n "${WEB_SEARCH_DOMAIN:-}" ]; then printf 'WEB_SEARCH_DOMAIN=%s\n' "$WEB_SEARCH_DOMAIN"; fi
 } > "$env_file"
 

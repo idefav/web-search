@@ -1,4 +1,4 @@
-import { WebToolError } from "camofox-web-search-core";
+import { builtInSearchProviderIds, WebToolError } from "camofox-web-search-core";
 
 function integer(name: string, fallback: number): number {
   const value = process.env[name];
@@ -18,7 +18,20 @@ export interface ServerConfig {
   maxQueue: number;
   queueTimeoutMs: number;
   operationTimeoutMs: number;
+  providerTimeoutMs: number;
+  providerCooldownMs: number;
+  providers: string[];
   rateLimitPerMinute: number;
+}
+
+function providers(): string[] {
+  const value = process.env.WEB_SEARCH_PROVIDERS ?? builtInSearchProviderIds.join(",");
+  const parsed = value.split(",").map((item) => item.trim()).filter(Boolean);
+  if (parsed.length === 0) throw new Error("WEB_SEARCH_PROVIDERS must contain at least one provider");
+  if (new Set(parsed).size !== parsed.length) throw new Error("WEB_SEARCH_PROVIDERS must not contain duplicates");
+  const unknown = parsed.find((provider) => !builtInSearchProviderIds.includes(provider as (typeof builtInSearchProviderIds)[number]));
+  if (unknown) throw new Error(`WEB_SEARCH_PROVIDERS contains unknown provider: ${unknown}`);
+  return parsed;
 }
 
 export function loadConfig(): ServerConfig {
@@ -37,6 +50,9 @@ export function loadConfig(): ServerConfig {
     maxQueue: integer("WEB_SEARCH_MAX_QUEUE", 20),
     queueTimeoutMs: integer("WEB_SEARCH_QUEUE_TIMEOUT_MS", 5_000),
     operationTimeoutMs: integer("WEB_SEARCH_OPERATION_TIMEOUT_MS", 45_000),
+    providerTimeoutMs: integer("WEB_SEARCH_PROVIDER_TIMEOUT_MS", 15_000),
+    providerCooldownMs: integer("WEB_SEARCH_PROVIDER_COOLDOWN_MS", 300_000),
+    providers: providers(),
     rateLimitPerMinute: integer("WEB_SEARCH_RATE_LIMIT_PER_MINUTE", 60)
   };
 }

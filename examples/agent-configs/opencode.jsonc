@@ -1,0 +1,12 @@
+{
+  "mcp": {
+    "camofox_web": {
+      "type": "remote",
+      "url": "https://search.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:WEB_SEARCH_API_KEY}"
+      },
+      "oauth": false
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildGoogleSearchUrl, normalizeDomain } from "../src/query.js";
+import { buildBingSearchUrl, buildBraveSearchUrl, buildDuckDuckGoSearchUrl, buildGoogleSearchUrl, normalizeDomain } from "../src/query.js";
 
 describe("Google query builder", () => {
   it("encodes filters, locale, and freshness deterministically", () => {
@@ -17,6 +17,20 @@ describe("Google query builder", () => {
     expect(url.searchParams.get("tbs")).toBe("qdr:w");
     expect(url.searchParams.get("hl")).toBe("en");
     expect(url.searchParams.get("gl")).toBe("us");
+  });
+
+  it("builds provider-specific URLs without losing common domain filters", () => {
+    const input = { query: "agents", count: 3, freshness: "week" as const, include_domains: ["example.com"], exclude_domains: [], language: "en", country: "US" };
+    const duck = new URL(buildDuckDuckGoSearchUrl(input));
+    expect(duck.searchParams.get("q")).toBe("agents site:example.com");
+    expect(duck.searchParams.get("df")).toBe("w");
+    expect(duck.searchParams.get("kl")).toBe("us-en");
+    const brave = new URL(buildBraveSearchUrl(input));
+    expect(brave.searchParams.get("freshness")).toBe("pw");
+    expect(brave.searchParams.get("search_lang")).toBe("en");
+    const bing = new URL(buildBingSearchUrl({ ...input, freshness: undefined }));
+    expect(bing.searchParams.get("cc")).toBe("US");
+    expect(bing.searchParams.get("setlang")).toBe("en");
   });
 
   it("normalizes IDNs and rejects URL-shaped domain filters", () => {

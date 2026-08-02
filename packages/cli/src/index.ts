@@ -30,7 +30,7 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
     checks.push({ name: "health", ok: false, detail: error instanceof Error ? error.message : String(error) });
   }
   if (process.env.WEB_SEARCH_API_KEY) {
-    const client = new Client({ name: "camofox-web-search-doctor", version: "0.1.0" });
+    const client = new Client({ name: "camofox-web-search-doctor", version: "0.0.2" });
     const transport = new StreamableHTTPClientTransport(new URL(`${endpoint.replace(/\/$/, "")}/mcp`), {
       requestInit: { headers: { authorization: `Bearer ${process.env.WEB_SEARCH_API_KEY}` } }
     });
@@ -52,7 +52,11 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
         body: JSON.stringify({ query: "Camofox browser", count: 1 }),
         signal: AbortSignal.timeout(55_000)
       });
-      checks.push({ name: "live-search", ok: response.ok, detail: `HTTP ${response.status}` });
+      const body = await response.json().catch(() => undefined) as { provider?: string; error?: { code?: string; retry_after_seconds?: number } } | undefined;
+      const detail = response.ok
+        ? `HTTP ${response.status}; provider=${body?.provider ?? "unknown"}`
+        : `HTTP ${response.status}; error=${body?.error?.code ?? "unknown"}${body?.error?.retry_after_seconds ? `; retry_after_seconds=${body.error.retry_after_seconds}` : ""}`;
+      checks.push({ name: "live-search", ok: response.ok, detail });
     } catch (error) {
       checks.push({ name: "live-search", ok: false, detail: error instanceof Error ? error.message : String(error) });
     }

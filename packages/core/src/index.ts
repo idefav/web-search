@@ -2,6 +2,8 @@ export * from "./contracts.js";
 export * from "./errors.js";
 export * from "./query.js";
 export * from "./google-parser.js";
+export * from "./result-url.js";
+export * from "./search-providers.js";
 export * from "./safety.js";
 export * from "./camofox-client.js";
 export * from "./semaphore.js";
