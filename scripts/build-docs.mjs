@@ -102,6 +102,7 @@ for (const language of Object.keys(languages)) {
 
 const rootPage = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="google-site-verification" content="ZOHNUKmr1VHnRVmxhhE_1QhWZvnPtcvGvkTUFhFl4RE">
 <meta name="description" content="Camofox Web Search documentation"><title>Camofox Web Search</title>
 <link rel="stylesheet" href="styles.css"></head><body class="language-home">
 <main><section class="hero"><p class="eyebrow">SELF-HOSTED · MCP + REST</p><h1>Camofox Web Search</h1>
