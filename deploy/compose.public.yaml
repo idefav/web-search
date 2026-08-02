@@ -1,0 +1,22 @@
+services:
+  caddy:
+    image: caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
+    restart: unless-stopped
+    environment:
+      WEB_SEARCH_DOMAIN: ${WEB_SEARCH_DOMAIN:?set WEB_SEARCH_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [ingress]
+    depends_on:
+      gateway:
+        condition: service_started
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}

@@ -1,0 +1,11 @@
+{
+  "id": "camofox-browser",
+  "name": "Camofox Browser",
+  "version": "1.13.0",
+  "newPageTimeoutMs": 10000,
+  "plugins": {
+    "youtube": { "enabled": false },
+    "persistence": { "enabled": false },
+    "vnc": { "enabled": false }
+  }
+}

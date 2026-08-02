@@ -1,0 +1,21 @@
+{
+  "name": "camofox-web-search-client",
+  "version": "0.1.0",
+  "description": "Typed REST client for camofox-web-search",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "publishConfig": { "access": "public" },
+  "scripts": { "build": "tsc -b" },
+  "dependencies": {
+    "camofox-web-search-core": "0.1.0"
+  }
+}

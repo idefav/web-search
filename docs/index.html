@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Deploy Camofox Web Search and connect Codex, Claude Code, OpenCode, or Pi.">
+  <title>Camofox Web Search</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">SELF-HOSTED · MCP + REST</p>
+      <h1>给所有 Coding Agent<br>同一个 Web Search</h1>
+      <p class="lede">在 Camofox Browser 之上提供受控的 <code>web_search</code> 和 <code>web_fetch</code>，一次部署，接入 Codex、Claude Code、OpenCode 与 Pi。</p>
+      <div class="badges"><span>Google Search</span><span>SSRF Guard</span><span>Bearer Auth</span><span>Node 22</span></div>
+    </header>
+
+    <section>
+      <div class="section-heading"><span>01</span><h2>部署服务端</h2></div>
+      <p class="notice"><strong>GitHub Pages 只托管这份静态文档。</strong>真实服务通过 GHCR 镜像部署到你的 Linux 服务器。</p>
+      <div class="fields">
+        <label>GitHub owner<input id="owner" value="OWNER" autocomplete="off"></label>
+        <label>Repository<input id="repo" value="REPO" autocomplete="off"></label>
+        <label>域名（可选）<input id="domain" placeholder="search.example.com" autocomplete="off"></label>
+      </div>
+      <div class="command-card">
+        <div><span>Linux / Docker Compose</span><button data-copy="deploy-command">复制</button></div>
+        <pre id="deploy-command"></pre>
+      </div>
+      <p class="muted">脚本生成两把独立随机密钥，固定 Camofox 与出口代理镜像，并默认只监听 127.0.0.1。填写域名后会启动 Caddy 自动签发 TLS 证书。</p>
+    </section>
+
+    <section>
+      <div class="section-heading"><span>02</span><h2>安装客户端</h2></div>
+      <div class="command-card">
+        <div><span>安装 CLI</span><button data-copy="npm-command">复制</button></div>
+        <pre id="npm-command">npm install -g camofox-web-search</pre>
+      </div>
+      <div class="agent-grid">
+        <article><h3>Codex</h3><code>camofox-web-search install codex</code></article>
+        <article><h3>Claude Code</h3><code>camofox-web-search install claude</code></article>
+        <article><h3>OpenCode</h3><code>camofox-web-search install opencode</code></article>
+        <article><h3>Pi</h3><code>camofox-web-search install pi</code></article>
+      </div>
+      <div class="command-card">
+        <div><span>配置示例</span><button data-copy="agent-command">复制</button></div>
+        <pre id="agent-command"></pre>
+      </div>
+      <p class="muted">令牌始终来自 <code>WEB_SEARCH_API_KEY</code> 环境变量，安装器不会把密钥写入 Agent 配置。</p>
+    </section>
+
+    <section>
+      <div class="section-heading"><span>03</span><h2>发布流程</h2></div>
+      <div class="release-grid">
+        <article><strong>GitHub Pages</strong><p>main 分支自动发布此站点。</p></article>
+        <article><strong>GHCR</strong><p>版本标签构建多架构 gateway 镜像。</p></article>
+        <article><strong>npm</strong><p>GitHub Release 发布四个依赖有序的软件包。</p></article>
+      </div>
+    </section>
+  </main>
+  <footer>Web content returned by the tools is untrusted data.</footer>
+  <script src="app.js"></script>
+</body>
+</html>

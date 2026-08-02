@@ -1,0 +1,36 @@
+name: Docker E2E
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  docker-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      WEB_SEARCH_API_KEY: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+      CAMOFOX_ACCESS_KEY: iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii
+      WEB_SEARCH_ENDPOINT: http://127.0.0.1:8080
+      COMPOSE_PROJECT_NAME: camofox-web-search-e2e
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci && npm run build
+      - name: Start full stack
+        run: docker compose -f deploy/compose.yaml up -d --build --wait --wait-timeout 180
+      - name: Run E2E
+        run: scripts/docker-e2e.sh
+      - name: Container logs
+        if: failure()
+        run: docker compose -f deploy/compose.yaml logs --no-color --tail=300
+      - name: Stop full stack
+        if: always()
+        run: docker compose -f deploy/compose.yaml down -v --remove-orphans

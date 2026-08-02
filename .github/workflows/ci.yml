@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm audit
+      - run: node scripts/verify-release.mjs
+      - name: Verify npm package contents
+        run: |
+          npm pack --dry-run --workspace camofox-web-search-core
+          npm pack --dry-run --workspace camofox-web-search-client
+          npm pack --dry-run --workspace camofox-web-search
+          npm pack --dry-run --workspace camofox-web-search-pi
+      - name: Validate shell scripts
+        run: shellcheck deploy/bootstrap.sh scripts/docker-e2e.sh
+      - name: Validate Compose
+        env:
+          WEB_SEARCH_API_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          CAMOFOX_ACCESS_KEY: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        run: docker compose -f deploy/compose.yaml config --quiet
+      - name: Build gateway image
+        run: docker build -f deploy/Dockerfile .

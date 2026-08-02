@@ -1,0 +1,104 @@
+services:
+  gateway:
+    image: ${WEB_SEARCH_IMAGE:-camofox-web-search:local}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      WEB_SEARCH_API_KEY: ${WEB_SEARCH_API_KEY:?set WEB_SEARCH_API_KEY}
+      CAMOFOX_URL: http://camofox:9377
+      CAMOFOX_ACCESS_KEY: ${CAMOFOX_ACCESS_KEY:?set CAMOFOX_ACCESS_KEY}
+      WEB_SEARCH_CONCURRENCY: "3"
+      WEB_SEARCH_MAX_QUEUE: "20"
+      WEB_SEARCH_OPERATION_TIMEOUT_MS: "45000"
+    ports:
+      - "127.0.0.1:${WEB_SEARCH_PORT:-8080}:8080"
+    networks: [ingress, backend]
+    depends_on:
+      camofox:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  camofox:
+    image: ghcr.io/jo-inc/camofox-browser:1.13.0@sha256:64b30ffdbbc4ae0e28200a66dfbd6f55ac4188229eb34ef769afcf7be40faa6e
+    restart: unless-stopped
+    environment:
+      CAMOFOX_BIND_HOST: 0.0.0.0
+      CAMOFOX_ACCESS_KEY: ${CAMOFOX_ACCESS_KEY:?set CAMOFOX_ACCESS_KEY}
+      CAMOFOX_CRASH_REPORT_ENABLED: "false"
+      CAMOFOX_DISABLE_DEFAULT_ADDONS: "true"
+      PROXY_HOST: egress-guard
+      PROXY_PORT: "3128"
+      MAX_CONCURRENT_PER_USER: "3"
+      MAX_SESSIONS: "8"
+      MAX_TABS_PER_SESSION: "3"
+      MAX_TABS_GLOBAL: "12"
+    volumes:
+      - ./camofox.config.json:/app/camofox.config.json:ro
+      - geolite-data:/opt/geolite:ro
+    command:
+      - sh
+      - -c
+      - >-
+        install -m 0644 /opt/geolite/GeoLite2-City.mmdb
+        /root/.cache/camoufox/GeoLite2-City.mmdb &&
+        exec node --max-old-space-size=$${MAX_OLD_SPACE_SIZE:-128} server.js
+    tmpfs:
+      - /tmp:size=512m
+      - /root/.camofox:size=256m
+    shm_size: 1gb
+    networks: [backend]
+    depends_on:
+      egress-guard:
+        condition: service_started
+      geolite-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9377/health | grep -q '\"browserConnected\":true' && curl -fsS http://127.0.0.1:9377/health | grep -q '\"browserRunning\":true'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  egress-guard:
+    image: ubuntu/squid:6.10-24.10_edge@sha256:c9f5212b147a766529c7b026e2bebed37b998d33d0066b658596af5eba7cc65c
+    restart: unless-stopped
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro
+    networks: [backend, egress]
+
+  geolite-init:
+    image: curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
+    restart: "no"
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - >-
+        expected=6e6684cab04ebba10c1ea9f4a443175ca0ff080e255e84f9ef0350517582657e;
+        target=/geolite/GeoLite2-City.mmdb;
+        if [ ! -f "$$target" ] ||
+        [ "$$(sha256sum "$$target" | cut -d ' ' -f 1)" != "$$expected" ]; then
+        curl --fail --location --silent --show-error --retry 5
+        --output "$$target.tmp"
+        https://github.com/P3TERX/GeoLite.mmdb/releases/download/2026.08.01/GeoLite2-City.mmdb;
+        echo "$$expected  $$target.tmp" | sha256sum -c -;
+        mv "$$target.tmp" "$$target";
+        fi;
+        echo "$$expected  $$target" | sha256sum -c -
+    volumes:
+      - geolite-data:/geolite
+    networks: [egress]
+
+networks:
+  ingress: {}
+  backend:
+    internal: true
+  egress: {}
+
+volumes:
+  geolite-data: {}

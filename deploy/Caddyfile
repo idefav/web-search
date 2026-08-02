@@ -1,0 +1,14 @@
+{$WEB_SEARCH_DOMAIN} {
+	encode zstd gzip
+
+	@internal path /metrics
+	respond @internal 404
+
+	reverse_proxy gateway:8080
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+}

@@ -1,0 +1,21 @@
+{
+  "name": "camofox-web-search-core",
+  "version": "0.1.0",
+  "description": "Shared contracts and Camofox orchestration for camofox-web-search",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "publishConfig": { "access": "public" },
+  "scripts": { "build": "tsc -b" },
+  "dependencies": {
+    "zod": "4.3.6"
+  }
+}

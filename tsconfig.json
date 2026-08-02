@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/client" },
+    { "path": "apps/server" },
+    { "path": "packages/cli" },
+    { "path": "plugins/pi" }
+  ]
+}

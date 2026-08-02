@@ -1,0 +1,15 @@
+{
+  "name": "camofox-web-search",
+  "version": "0.1.0",
+  "description": "Install and diagnose camofox-web-search for Codex, Claude Code, OpenCode, and Pi",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "camofox-web-search": "dist/index.js" },
+  "files": ["dist"],
+  "publishConfig": { "access": "public" },
+  "scripts": { "build": "tsc -b" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "jsonc-parser": "3.3.1"
+  }
+}
