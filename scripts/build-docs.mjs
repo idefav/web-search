@@ -93,6 +93,7 @@ const rootPage = `<!doctype html>
 await writeFile(join(output, "index.html"), rootPage);
 await cp(join(source, "styles.css"), join(output, "styles.css"));
 await cp(join(source, "app.js"), join(output, "app.js"));
+await cp(join(source, "assets"), join(output, "assets"), { recursive: true });
 await writeFile(join(output, ".nojekyll"), "");
 
 process.stdout.write(`Built bilingual documentation for v${version} in ${output}\n`);

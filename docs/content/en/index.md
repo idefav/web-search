@@ -23,6 +23,12 @@ Version 0.0.3 improves WeChat Official Account article fetching, returns retryab
 
 [Read the release notes](/en/releases/) or open the [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.3).
 
+## Architecture
+
+<img class="architecture-diagram" src="../assets/architecture.png" alt="Camofox Web Search architecture: Coding Agents connect through MCP or REST to the authenticated gateway, Camofox Browser, and the public web through the Squid SSRF guard.">
+
+Agents can access only the gateway. Camofox stays on the internal network, and its browser traffic can reach the public web only through the SSRF-filtering Squid egress guard.
+
 ## Start here
 
 1. Follow the [server deployment guide](/en/deployment/) to create a version-pinned deployment.

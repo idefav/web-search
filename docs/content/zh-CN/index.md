@@ -23,6 +23,12 @@ Camofox Web Search 是一个可自托管、只读的 `web_search` 与 `web_fetch
 
 [查看 Release Notes](/zh-CN/releases/)或打开 [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.3)。
 
+## 架构
+
+<img class="architecture-diagram" src="../assets/architecture.png" alt="Camofox Web Search 架构：Coding Agent 通过 MCP 或 REST 连接认证 Gateway，再经 Camofox Browser 与带 SSRF 防护的 Squid 访问公开网页。">
+
+Agent 只能访问 Gateway。Camofox 位于内部网络中，浏览器流量必须经过带 SSRF 防护的 Squid 出站代理才能访问公开网页。
+
 ## 从这里开始
 
 1. 按照[服务端部署指南](/zh-CN/deployment/)创建固定版本的部署。

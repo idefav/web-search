@@ -24,9 +24,7 @@ Read the complete [v0.0.3 release notes](https://github.com/idefav/web-search/re
 
 ## Architecture
 
-```text
-Agent ──HTTPS/MCP or REST──> Gateway ──internal──> Camofox ──Squid egress guard──> Public web
-```
+![Camofox Web Search architecture: Coding Agents connect through MCP or REST to the authenticated gateway, Camofox Browser, and the public web through the Squid SSRF guard.](./docs/assets/architecture.png)
 
 - `apps/server`: authenticated REST and stateless MCP gateway.
 - `packages/core`: contracts, pluggable search providers, URL safety, and browser orchestration.

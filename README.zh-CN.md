@@ -24,9 +24,7 @@
 
 ## 架构
 
-```text
-Agent ──HTTPS/MCP 或 REST──> Gateway ──内部网络──> Camofox ──Squid 出口防护──> 公开网页
-```
+![Camofox Web Search 架构：Coding Agent 通过 MCP 或 REST 连接认证 Gateway，再经 Camofox Browser 与带 SSRF 防护的 Squid 访问公开网页。](./docs/assets/architecture.png)
 
 - `apps/server`：带认证的 REST 与 MCP gateway。
 - `packages/core`：公开契约、可插拔搜索 Provider、URL 安全和浏览器编排。
