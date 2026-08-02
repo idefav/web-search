@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search-core",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Shared contracts and Camofox orchestration for camofox-web-search",
   "license": "MIT",
   "repository": {
