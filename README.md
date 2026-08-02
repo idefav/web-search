@@ -104,7 +104,16 @@ The repository includes four workflows:
 - `Release`: after a GitHub Release is published, validates its tag, publishes a multi-architecture GHCR image with SBOM/provenance, and publishes the four npm packages in dependency order. Prereleases use the npm `next` tag and never replace the container `latest` tag.
 - `Docker E2E`: runs the real pinned Camofox, Squid, and gateway stack weekly and on demand.
 
-Before the first npm release, authenticate locally with `npm login`, or add an npm automation token as the `NPM_TOKEN` secret in the GitHub `npm` environment. After each package exists on npm, Trusted Publishing can replace the token: configure repository `idefav/web-search`, workflow `release.yml`, and environment `npm` in each package's npm settings. The workflow has the required OIDC permission.
+npm publication uses Trusted Publishing only; no long-lived npm token is accepted by the workflow. Configure these values in each package's npm **Settings → Trusted Publisher** section:
+
+- Provider: GitHub Actions
+- Organization or user: `idefav`
+- Repository: `web-search`
+- Workflow filename: `release.yml`
+- Environment name: `npm`
+- Allowed action: `npm publish`
+
+Trusted Publishing can only be configured from an existing package's settings. For brand-new package names, perform a one-time bootstrap publication with an interactive maintainer login and 2FA, then configure the publisher above. Subsequent releases authenticate exclusively through short-lived OIDC credentials and generate provenance automatically.
 
 Prepare and publish a release with:
 

@@ -91,7 +91,6 @@ jobs:
       contents: read
       id-token: write
     env:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       NPM_DIST_TAG: ${{ github.event.release.prerelease && 'next' || 'latest' }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -104,10 +103,7 @@ jobs:
       - run: npm install --global npm@12.0.2
       - run: npm ci
       - run: npm run build
-      - name: Configure npm token fallback
-        if: env.NPM_TOKEN != ''
-        run: npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN" --location=user
-      - name: Publish packages in dependency order
+      - name: Publish packages through npm Trusted Publishing
         run: |
           publish_workspace() {
             workspace="$1"
@@ -116,7 +112,7 @@ jobs:
             if npm view "$name@$version" version >/dev/null 2>&1; then
               echo "$name@$version already exists; skipping"
             else
-              npm publish --workspace "$name" --access public --provenance --tag "$NPM_DIST_TAG"
+              npm publish --workspace "$name" --access public --tag "$NPM_DIST_TAG"
             fi
           }
           publish_workspace packages/core
