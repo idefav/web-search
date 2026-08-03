@@ -7,8 +7,8 @@ camofox_key=${CAMOFOX_ACCESS_KEY:?CAMOFOX_ACCESS_KEY is required}
 compose_project=${COMPOSE_PROJECT_NAME:-camofox-web-search-e2e}
 compose_file=${COMPOSE_FILE:-deploy/compose.yaml}
 
-curl -fsS "$endpoint/healthz" >/dev/null
-curl -fsS "$endpoint/readyz" >/dev/null
+curl --retry 10 --retry-delay 1 --retry-connrefused --retry-all-errors -fsS "$endpoint/healthz" >/dev/null
+curl --retry 10 --retry-delay 1 --retry-connrefused --retry-all-errors -fsS "$endpoint/readyz" >/dev/null
 
 unauthorized_code=$(curl -sS -o /tmp/camofox-web-search-unauthorized.json -w '%{http_code}' \
   -H 'content-type: application/json' -d '{"query":"test"}' "$endpoint/v1/search")

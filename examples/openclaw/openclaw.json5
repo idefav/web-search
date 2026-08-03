@@ -1,0 +1,25 @@
+{
+  plugins: {
+    entries: {
+      camofox: {
+        enabled: true,
+        config: {
+          endpoint: "https://search.example.com",
+          webSearch: {
+            apiKey: { source: "env", provider: "default", id: "WEB_SEARCH_API_KEY" },
+          },
+          webFetch: {
+            apiKey: { source: "env", provider: "default", id: "WEB_SEARCH_API_KEY" },
+          },
+        },
+      },
+    },
+  },
+  tools: {
+    web: {
+      search: { provider: "camofox" },
+      fetch: { provider: "camofox" },
+    },
+  },
+}
+

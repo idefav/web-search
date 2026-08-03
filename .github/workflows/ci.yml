@@ -32,6 +32,7 @@ jobs:
           npm pack --dry-run --workspace camofox-web-search-client
           npm pack --dry-run --workspace camofox-web-search
           npm pack --dry-run --workspace camofox-web-search-pi
+          npm pack --dry-run --workspace camofox-web-search-openclaw
       - name: Validate shell scripts
         run: shellcheck deploy/bootstrap.sh scripts/docker-e2e.sh
       - name: Validate Compose
@@ -58,3 +59,55 @@ jobs:
       - run: uv sync --locked
       - run: uv run python -m compileall -q agent.py model_provider.py settings.py web_search_tools.py
       - run: uv run pytest
+
+  hermes-plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.11"
+      - run: uv build plugins/hermes
+      - run: uvx twine check plugins/hermes/dist/*
+      - run: uv venv /tmp/hermes-test
+      - run: uv pip install --python /tmp/hermes-test/bin/python hermes-agent==0.19.0 pytest plugins/hermes
+      - run: /tmp/hermes-test/bin/python -m pytest plugins/hermes/tests
+      - run: /tmp/hermes-test/bin/python -c "from importlib.metadata import entry_points; ep=[e for e in entry_points(group='hermes_agent.plugins') if e.name == 'camofox-web-search']; assert len(ep) == 1; assert callable(ep[0].load())"
+      - name: Verify native provider activation
+        env:
+          HERMES_HOME: /tmp/hermes-home
+          WEB_SEARCH_API_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        run: |
+          /tmp/hermes-test/bin/hermes plugins enable camofox-web-search --no-allow-tool-override
+          /tmp/hermes-test/bin/hermes config set WEB_SEARCH_ENDPOINT http://127.0.0.1:8080 --force
+          /tmp/hermes-test/bin/hermes config set web.search_backend camofox
+          /tmp/hermes-test/bin/hermes config set web.extract_backend camofox
+          /tmp/hermes-test/bin/python -c "from camofox_web_search_hermes import CamofoxWebSearchProvider as P; p=P(); assert p.is_available() and p.supports_search() and p.supports_extract()"
+
+  openclaw-plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: 22.22.3
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm pack --workspace camofox-web-search-openclaw --pack-destination /tmp
+      - run: npm install --global openclaw@2026.7.1-2
+      - name: Verify native provider registration
+        env:
+          OPENCLAW_STATE_DIR: /tmp/openclaw-state
+          WEB_SEARCH_ENDPOINT: http://127.0.0.1:8080
+          WEB_SEARCH_API_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        run: |
+          node packages/cli/dist/index.js install openclaw \
+            --endpoint "$WEB_SEARCH_ENDPOINT" --scope user \
+            --openclaw-package /tmp/camofox-web-search-openclaw-*.tgz --force
+          openclaw plugins inspect camofox --runtime --json > /tmp/openclaw-inspect.json
+          node -e "const x=require('/tmp/openclaw-inspect.json').plugin; if (!x.webSearchProviderIds.includes('camofox') || !x.webFetchProviderIds.includes('camofox')) process.exit(1)"
+          node packages/cli/dist/index.js uninstall openclaw \
+            --endpoint "$WEB_SEARCH_ENDPOINT" --scope user

@@ -3,9 +3,10 @@ import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { configPath, type Scope, type Target, updateTarget } from "./config-editors.js";
+import { configPath, detectHermesPython, type Scope, type Target, updateTarget } from "./config-editors.js";
 
-const targets = new Set<Target>(["codex", "claude", "opencode", "pi"]);
+const targets = new Set<Target>(["codex", "claude", "opencode", "pi", "openclaw", "hermes"]);
+const cliVersion = (JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8")) as { version: string }).version;
 
 function valueAfter(args: string[], name: string): string | undefined {
   const index = args.indexOf(name);
@@ -13,10 +14,10 @@ function valueAfter(args: string[], name: string): string | undefined {
 }
 
 function usage(): never {
-  throw new Error("Usage: camofox-web-search <install|uninstall|doctor> <codex|claude|opencode|pi> --endpoint <https://host> [--scope user|project] [--dry-run] [--force] [--live] [--pi-package <source>]");
+  throw new Error("Usage: camofox-web-search <install|uninstall|doctor> <codex|claude|opencode|pi|openclaw|hermes> --endpoint <https://host> [--scope user|project] [--dry-run] [--force] [--live] [--pi-package <source>] [--openclaw-package <source>] [--hermes-package <source>] [--hermes-python <path>]");
 }
 
-async function doctor(target: Target, scope: Scope, endpoint: string, cwd: string, live: boolean): Promise<void> {
+async function doctor(target: Target, scope: Scope, endpoint: string, cwd: string, live: boolean, hermesPython?: string): Promise<void> {
   const checks: Array<{ name: string; ok: boolean; detail: string }> = [];
   const path = configPath(target, scope, cwd);
   checks.push({ name: "config", ok: await access(path).then(() => true).catch(() => false), detail: path });
@@ -30,7 +31,7 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
     checks.push({ name: "health", ok: false, detail: error instanceof Error ? error.message : String(error) });
   }
   if (process.env.WEB_SEARCH_API_KEY) {
-    const client = new Client({ name: "camofox-web-search-doctor", version: "0.0.3" });
+    const client = new Client({ name: "camofox-web-search-doctor", version: cliVersion });
     const transport = new StreamableHTTPClientTransport(new URL(`${endpoint.replace(/\/$/, "")}/mcp`), {
       requestInit: { headers: { authorization: `Bearer ${process.env.WEB_SEARCH_API_KEY}` } }
     });
@@ -43,6 +44,29 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
     } finally {
       await transport.close().catch(() => undefined);
     }
+  }
+  if (target === "openclaw") {
+    const result = await import("node:child_process").then(({ spawnSync }) => spawnSync(process.env.OPENCLAW_BIN ?? "openclaw", ["plugins", "inspect", "camofox", "--runtime", "--json"], { encoding: "utf8" }));
+    let registered = false;
+    if (result.status === 0) {
+      try {
+        const plugin = (JSON.parse(result.stdout) as { plugin?: { webSearchProviderIds?: string[]; webFetchProviderIds?: string[] } }).plugin;
+        registered = plugin?.webSearchProviderIds?.includes("camofox") === true && plugin.webFetchProviderIds?.includes("camofox") === true;
+      } catch {
+        registered = false;
+      }
+    }
+    checks.push({ name: "openclaw-provider", ok: registered, detail: registered ? "camofox search/fetch providers registered" : (result.stderr.trim() || "runtime inspection failed") });
+  }
+  if (target === "hermes") {
+    let command = hermesPython ?? process.env.HERMES_PYTHON ?? "";
+    try {
+      command ||= detectHermesPython({ target, scope, endpoint, cwd, force: false, dryRun: false });
+    } catch {
+      command = "python3";
+    }
+    const result = await import("node:child_process").then(({ spawnSync }) => spawnSync(command, ["-c", "from camofox_web_search_hermes import CamofoxWebSearchProvider as P; p=P(); assert p.supports_search() and p.supports_extract(); print(p.name)"], { encoding: "utf8" }));
+    checks.push({ name: "hermes-provider", ok: result.status === 0 && result.stdout.trim() === "camofox", detail: result.status === 0 ? "camofox search/extract provider importable" : (result.stderr.trim() || "provider import failed; pass --hermes-python") });
   }
   if (live && process.env.WEB_SEARCH_API_KEY) {
     try {
@@ -77,8 +101,20 @@ async function main(): Promise<void> {
   const parsed = new URL(endpoint);
   if (parsed.protocol !== "https:" && !["localhost", "127.0.0.1", "::1"].includes(parsed.hostname)) throw new Error("Remote endpoints must use HTTPS");
   const cwd = resolve(process.cwd());
-  if (command === "doctor") return doctor(target, scope, endpoint, cwd, args.includes("--live"));
-  await updateTarget({ target, scope, endpoint, cwd, force: args.includes("--force"), dryRun: args.includes("--dry-run"), piPackage: valueAfter(args, "--pi-package") }, command === "uninstall");
+  if (command === "doctor") return doctor(target, scope, endpoint, cwd, args.includes("--live"), valueAfter(args, "--hermes-python"));
+  await updateTarget({
+    target,
+    scope,
+    endpoint,
+    cwd,
+    force: args.includes("--force"),
+    dryRun: args.includes("--dry-run"),
+    piPackage: valueAfter(args, "--pi-package"),
+    openclawPackage: valueAfter(args, "--openclaw-package"),
+    hermesPackage: valueAfter(args, "--hermes-package"),
+    hermesPython: valueAfter(args, "--hermes-python"),
+    version: cliVersion
+  }, command === "uninstall");
   if (command === "install") process.stdout.write(`Configured ${target}. Export WEB_SEARCH_API_KEY before starting the agent.\n`);
 }
 

@@ -1,0 +1,7 @@
+name: camofox-web-search
+version: 0.0.4
+description: "Self-hosted Camofox web search and extraction provider. Requires WEB_SEARCH_ENDPOINT and WEB_SEARCH_API_KEY."
+author: Camofox Web Search contributors
+kind: backend
+provides_web_providers:
+  - camofox

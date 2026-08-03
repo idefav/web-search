@@ -37,7 +37,7 @@ To use a custom OpenAI-compatible model endpoint, set `DEEPAGENTS_MODEL` to the 
 
 Read the [Deep Agents example README](https://github.com/idefav/web-search/tree/main/examples/deepagents) for configuration and error-handling details.
 
-## Codex, Claude Code, OpenCode, and Pi
+## Codex, Claude Code, OpenCode, Pi, OpenClaw, and HermesAgent
 
 The CLI is the recommended installation path because it writes idempotently, preserves unrelated settings, stores backups, and never persists the token.
 
@@ -47,9 +47,36 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search install claude --endpoint https://search.example.com --scope project
 camofox-web-search install opencode --endpoint https://search.example.com --scope user
 camofox-web-search install pi --endpoint https://search.example.com --scope user
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
 ```
 
-The [manual configuration examples](https://github.com/idefav/web-search/tree/main/examples/agent-configs) show the exact managed entries for auditing or custom provisioning. Codex, Claude Code, and OpenCode use MCP. Pi installs the native npm extension and calls the REST gateway.
+The [manual configuration examples](https://github.com/idefav/web-search/tree/main/examples/agent-configs) show the exact managed entries for auditing or custom provisioning. Codex, Claude Code, and OpenCode use MCP. Pi installs its native npm extension. OpenClaw and HermesAgent use native provider APIs while calling the same REST gateway.
+
+### OpenClaw native provider
+
+The OpenClaw npm plugin registers the canonical `web_search` and `web_fetch` tools. It stores the API key as an environment SecretRef and requires a Gateway restart after installation.
+
+```bash
+export WEB_SEARCH_API_KEY="..."
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+openclaw gateway restart
+openclaw plugins inspect camofox --runtime --json
+```
+
+See the [complete OpenClaw example](https://github.com/idefav/web-search/tree/main/examples/openclaw) for manual JSON5 configuration and local package development.
+
+### HermesAgent native provider
+
+The PyPI plugin registers HermesAgent's canonical `web_search` and `web_extract`. The installer locates the Hermes Python environment automatically; use `--hermes-python` when needed.
+
+```bash
+export WEB_SEARCH_API_KEY="..."
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
+camofox-web-search doctor hermes --endpoint https://search.example.com --scope user --live
+```
+
+See the [complete HermesAgent example](https://github.com/idefav/web-search/tree/main/examples/hermes) for manual PyPI and backend configuration.
 
 ## Direct API calls
 

@@ -1,0 +1,52 @@
+{
+  "id": "camofox",
+  "activation": {
+    "onStartup": false
+  },
+  "enabledByDefault": false,
+  "setup": {
+    "providers": [
+      {
+        "id": "camofox",
+        "envVars": ["WEB_SEARCH_API_KEY", "WEB_SEARCH_ENDPOINT"]
+      }
+    ]
+  },
+  "contracts": {
+    "webSearchProviders": ["camofox"],
+    "webFetchProviders": ["camofox"]
+  },
+  "uiHints": {
+    "endpoint": {
+      "label": "Camofox endpoint",
+      "help": "HTTPS base URL for the Camofox Web Search gateway."
+    },
+    "webSearch.apiKey": {
+      "label": "Camofox API key",
+      "help": "Prefer an env SecretRef to WEB_SEARCH_API_KEY.",
+      "sensitive": true
+    },
+    "webFetch.apiKey": {
+      "label": "Camofox API key",
+      "help": "Prefer an env SecretRef to WEB_SEARCH_API_KEY.",
+      "sensitive": true
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "endpoint": { "type": ["string", "object"] },
+      "webSearch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "apiKey": { "type": ["string", "object"] } }
+      },
+      "webFetch": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "apiKey": { "type": ["string", "object"] } }
+      }
+    }
+  }
+}

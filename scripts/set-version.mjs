@@ -12,13 +12,15 @@ const packageFiles = [
   "packages/core/package.json",
   "packages/client/package.json",
   "packages/cli/package.json",
-  "plugins/pi/package.json"
+  "plugins/pi/package.json",
+  "plugins/openclaw/package.json"
 ];
 const internalPackages = new Set([
   "camofox-web-search-core",
   "camofox-web-search-client",
   "camofox-web-search",
   "camofox-web-search-pi",
+  "camofox-web-search-openclaw",
   "camofox-web-search-server"
 ]);
 
@@ -31,6 +33,26 @@ for (const path of packageFiles) {
     }
   }
   await writeFile(path, `${JSON.stringify(data, null, 2)}\n`);
+}
+
+const hermesPath = "plugins/hermes/pyproject.toml";
+const hermes = await readFile(hermesPath, "utf8");
+await writeFile(hermesPath, hermes.replace(/^version = "[^"]+"$/m, `version = "${version}"`));
+const hermesManifestPath = "plugins/hermes/src/camofox_web_search_hermes/plugin.yaml";
+const hermesManifest = await readFile(hermesManifestPath, "utf8");
+await writeFile(hermesManifestPath, hermesManifest.replace(/^version: .+$/m, `version: ${version}`));
+const hermesLockPath = "plugins/hermes/uv.lock";
+const hermesLock = await readFile(hermesLockPath, "utf8");
+await writeFile(hermesLockPath, hermesLock.replace(/(name = "camofox-web-search-hermes"\nversion = ")[^"]+/, `$1${version}`));
+
+const sourceVersions = [
+  ["apps/server/src/openapi.ts", /(title: "Camofox Web Search API", version: ")[^"]+/],
+  ["apps/server/src/mcp.ts", /(name: "camofox-web-search", version: ")[^"]+/],
+  ["packages/cli/src/config-editors.ts", /(options\.version \?\? ")[^"]+/g]
+];
+for (const [path, pattern] of sourceVersions) {
+  const content = await readFile(path, "utf8");
+  await writeFile(path, content.replace(pattern, `$1${version}`));
 }
 
 const npm = spawnSync("npm", ["install", "--package-lock-only", "--ignore-scripts"], { stdio: "inherit" });

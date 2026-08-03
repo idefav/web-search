@@ -37,7 +37,11 @@ for (const required of [
   "examples/agent-configs/codex.toml",
   "examples/agent-configs/claude.json",
   "examples/agent-configs/opencode.jsonc",
-  "examples/agent-configs/pi.json"
+  "examples/agent-configs/pi.json",
+  "examples/openclaw/README.md",
+  "examples/openclaw/openclaw.json5",
+  "examples/hermes/README.md",
+  "examples/hermes/config.yaml"
 ]) await access(join(root, required));
 
 process.stdout.write(`Validated ${htmlFiles.length} generated documentation pages and example links\n`);

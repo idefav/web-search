@@ -2,25 +2,26 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · [在线文档](https://idefav.github.io/web-search/zh-CN/) · [深度文章](https://idefav.github.io/web-search/zh-CN/article/)
 
-面向 Codex、Claude Code、OpenCode、Pi 与自定义 Agent 的自托管 `web_search`、`web_fetch` 服务。项目封装固定版本的 Camofox Browser REST API，不维护上游 Fork，同时提供带认证的 REST 和无状态 Streamable HTTP MCP。
+面向 Codex、Claude Code、OpenCode、Pi、OpenClaw、HermesAgent 与自定义 Agent 的自托管 Web Search 服务。项目封装固定版本的 Camofox Browser REST API，不维护上游 Fork，同时提供带认证的 REST、无状态 Streamable HTTP MCP 和原生 Provider 插件。
 
 ## 项目特色
 
-- **所有 Agent 共用一个服务：** Codex、Claude Code、OpenCode、Pi、LangChain 或任意 MCP/REST 客户端都能连接同一个 endpoint。
+- **所有 Agent 共用一个服务：** Codex、Claude Code、OpenCode、Pi、OpenClaw、HermesAgent、LangChain 或任意 MCP/REST 客户端都能连接同一个 endpoint。
+- **保留原生标准工具：** OpenClaw 继续使用 `web_search`/`web_fetch`，HermesAgent 继续使用 `web_search`/`web_extract`，无需增加 MCP 工具前缀。
 - **浏览器驱动的搜索与抓取：** 通过 Camofox 渲染 JavaScript 页面，不依赖商业搜索 API Key，同时保持浏览器实现固定版本且可替换。
 - **多 Provider 自动容错：** DuckDuckGo、Brave、Bing、Google 可插拔、可排序；Provider 被拦截后进入冷却，并自动切换到下一个。
 - **默认安全：** 只开放只读工具，强制 Bearer 认证，出站流量经过带 SSRF 防护的隔离代理，并明确将网页内容标记为不可信输入。
-- **部署与接入完整交付：** 同时提供固定版本 Docker Compose、多架构 GHCR 镜像、类型安全 REST 客户端、OpenAPI、Agent 安装器、Pi 插件和可运行示例。
+- **部署与接入完整交付：** 同时提供固定版本 Docker Compose、多架构 GHCR 镜像、类型安全 REST 客户端、OpenAPI、Agent 安装器、Pi/OpenClaw/HermesAgent 原生插件和可运行示例。
 - **可观测、易自动化：** 类型化错误、健康检查、Prometheus metrics、无状态 MCP、统一包版本和真实 Docker E2E 都属于正式支持路径。
 
-## v0.0.3 更新内容
+## v0.0.4 更新内容
 
-- 优化微信公众号文章抓取：针对短暂验证中间页以及空白或只有 iframe 的 snapshot 执行有界就绪等待。
-- 持续存在交互验证时返回 HTTP 503、`Retry-After` 和可重试的类型化 `fetch_blocked` 错误。
-- 从返回的最终 URL 中移除微信临时 `poc_token`，同时保留最终 URL 的 SSRF 校验。
-- 增加可配置的抓取就绪超时、结构化日志、Prometheus metrics、双语指引和真实微信 Docker E2E。
+- 增加 OpenClaw 原生 npm 插件，保留标准 `web_search` 与 `web_fetch` 工具。
+- 增加 HermesAgent 原生 PyPI Provider，提供 `web_search` 与 `web_extract`。
+- CLI 支持两个 Agent 的受管安装、诊断、冲突检查与原 Provider 安全恢复。
+- 增加可运行示例、双语文档、真实宿主兼容测试、Docker Provider E2E，以及 npm/PyPI Trusted Publishing。
 
-查看完整的 [v0.0.3 Release Notes](https://github.com/idefav/web-search/releases/tag/v0.0.3)或[全部版本](https://github.com/idefav/web-search/releases)。
+查看完整的 [v0.0.4 Release Notes](https://github.com/idefav/web-search/releases/tag/v0.0.4)或[全部版本](https://github.com/idefav/web-search/releases)。
 
 ## 架构
 
@@ -31,6 +32,8 @@
 - `packages/client`：类型安全的 REST 客户端。
 - `packages/cli`：可幂等执行的 Agent 配置安装器。
 - `plugins/pi`：Pi 原生工具。
+- `plugins/openclaw`：发布到 npm 的 OpenClaw 原生搜索/抓取 Provider。
+- `plugins/hermes`：发布到 PyPI 的 HermesAgent 原生搜索/提取 Provider。
 - `deploy`：浏览器网络隔离、镜像固定的 Docker 部署。
 - `examples`：Agent 手工配置与 LangChain Deep Agents 自定义研究 Agent。
 
@@ -41,7 +44,7 @@
 生产部署主线是安装了 Docker Engine、Compose v2、Git 和 OpenSSL 的 64 位 Linux 主机。源码 tag 与 GHCR 镜像必须使用同一个版本：
 
 ```bash
-VERSION="0.0.3"
+VERSION="0.0.4"
 git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
 cd web-search
 WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
@@ -73,9 +76,11 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search doctor codex --endpoint https://search.example.com --scope user
 ```
 
-可以把 `codex` 替换为 `claude`、`opencode` 或 `pi`。安装器只保存 endpoint 和环境变量引用，不会保存 Token。使用 `--dry-run` 预览改动，使用 `--force` 替换冲突的受管配置，使用 `doctor --live` 执行真实搜索验证。
+可以把 `codex` 替换为 `claude`、`opencode`、`pi`、`openclaw` 或 `hermes`。安装器只保存 endpoint 和环境变量引用，不会保存 Token。OpenClaw 与 HermesAgent 原生插件只支持 user scope。使用 `--dry-run` 预览改动，使用 `--force` 替换冲突的受管配置，使用 `doctor --live` 执行真实搜索验证。
 
 Pi 安装流程还会执行 `pi install npm:camofox-web-search-pi`，注册调用 REST gateway 的原生工具。
+
+OpenClaw 会安装 `camofox-web-search-openclaw` 并注册原生 `web_search`/`web_fetch`；HermesAgent 会把 `camofox-web-search-hermes` 安装到自身 Python 环境并注册 `web_search`/`web_extract`，非标准环境可传入 `--hermes-python`。
 
 ## API
 
@@ -105,6 +110,8 @@ Search 支持 `query`、`count`、`freshness`、`include_domains`、`exclude_dom
 
 - [`examples/deepagents`](./examples/deepagents)：可运行的 Python 3.11+ Deep Agents 自定义研究 Agent，支持 MCP/REST 工具、标准 LangChain 模型和自定义 OpenAI-compatible Provider。
 - [`examples/agent-configs`](./examples/agent-configs)：Codex、Claude Code、OpenCode 和 Pi 的准确手工配置。
+- [`examples/openclaw`](./examples/openclaw)：OpenClaw 原生 Provider 的 CLI 与手工接入。
+- [`examples/hermes`](./examples/hermes)：HermesAgent 原生 Provider 的 CLI 与手工接入。
 
 [示例文档](https://idefav.github.io/web-search/zh-CN/examples/)还包含直接 REST 调用方式。Agent 配置仍推荐使用 CLI 安装。
 
@@ -129,10 +136,10 @@ Deep Agents 示例使用 `uv sync --locked && uv run pytest` 进行不访问真�
 
 ## 发布
 
-- `CI`：TypeScript、单元测试、文档构建、Deep Agents 离线测试、npm 打包检查、Compose 验证和 gateway 镜像构建。
+- `CI`：TypeScript、单元测试、文档、Deep Agents、OpenClaw/HermesAgent 宿主兼容性、npm 打包检查、Compose 验证和 gateway 镜像构建。
 - `GitHub Pages`：相关改动进入 `main` 后构建并发布双语站点。
-- `Release`：通过 Trusted Publishing 与 OIDC 发布多架构 GHCR 镜像和四个 npm 包。
-- `Docker E2E`：每周和手工执行真实固定版本浏览器栈。
+- `Release`：通过 Trusted Publishing 与 OIDC 发布多架构 GHCR 镜像、五个 npm 包和 HermesAgent PyPI 包。
+- `Docker E2E`：每周和手工执行真实固定版本浏览器栈，并调用 OpenClaw 与 HermesAgent 原生 Provider。
 
 升级与回滚见[服务端部署指南](https://idefav.github.io/web-search/zh-CN/deployment/)。
 

@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search-client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Typed REST client for camofox-web-search",
   "license": "MIT",
   "repository": {
@@ -31,6 +31,6 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "camofox-web-search-core": "0.0.3"
+    "camofox-web-search-core": "0.0.4"
   }
 }

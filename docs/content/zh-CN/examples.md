@@ -37,7 +37,7 @@ uv run --env-file .env python agent.py --transport mcp --stream \
 
 配置方式和错误处理详见 [Deep Agents 示例 README](https://github.com/idefav/web-search/tree/main/examples/deepagents)。
 
-## Codex、Claude Code、OpenCode 与 Pi
+## Codex、Claude Code、OpenCode、Pi、OpenClaw 与 HermesAgent
 
 推荐使用 CLI 安装，因为它支持幂等写入、保留无关配置、创建备份，并且永远不会持久化 Token。
 
@@ -47,9 +47,36 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search install claude --endpoint https://search.example.com --scope project
 camofox-web-search install opencode --endpoint https://search.example.com --scope user
 camofox-web-search install pi --endpoint https://search.example.com --scope user
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
 ```
 
-[手工配置示例](https://github.com/idefav/web-search/tree/main/examples/agent-configs)展示了安装器管理的准确配置，适合审计或自定义配置分发。Codex、Claude Code 和 OpenCode 使用 MCP；Pi 安装原生 npm 扩展并调用 REST gateway。
+[手工配置示例](https://github.com/idefav/web-search/tree/main/examples/agent-configs)展示了安装器管理的准确配置，适合审计或自定义配置分发。Codex、Claude Code 和 OpenCode 使用 MCP；Pi 安装原生 npm 扩展；OpenClaw 与 HermesAgent 使用各自原生 Provider API，并调用同一个 REST gateway。
+
+### OpenClaw 原生 Provider
+
+OpenClaw npm 插件注册标准 `web_search` 与 `web_fetch`，API Key 使用环境变量 SecretRef，安装后需要重启 Gateway。
+
+```bash
+export WEB_SEARCH_API_KEY="..."
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+openclaw gateway restart
+openclaw plugins inspect camofox --runtime --json
+```
+
+[完整 OpenClaw 示例](https://github.com/idefav/web-search/tree/main/examples/openclaw)包含手工 JSON5 配置与本地包开发方式。
+
+### HermesAgent 原生 Provider
+
+PyPI 插件注册 HermesAgent 标准 `web_search` 与 `web_extract`。安装器会自动发现 Hermes Python 环境，非标准环境可传入 `--hermes-python`。
+
+```bash
+export WEB_SEARCH_API_KEY="..."
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
+camofox-web-search doctor hermes --endpoint https://search.example.com --scope user --live
+```
+
+[完整 HermesAgent 示例](https://github.com/idefav/web-search/tree/main/examples/hermes)包含手工 PyPI 安装与 backend 配置。
 
 ## 直接调用 API
 

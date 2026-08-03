@@ -7,6 +7,7 @@ COPY packages/core/package.json packages/core/package.json
 COPY packages/client/package.json packages/client/package.json
 COPY packages/cli/package.json packages/cli/package.json
 COPY plugins/pi/package.json plugins/pi/package.json
+COPY plugins/openclaw/package.json plugins/openclaw/package.json
 RUN npm ci
 
 COPY apps ./apps

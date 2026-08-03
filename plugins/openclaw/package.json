@@ -1,12 +1,12 @@
 {
-  "name": "camofox-web-search-pi",
+  "name": "camofox-web-search-openclaw",
   "version": "0.0.4",
-  "description": "Native Pi extension for camofox-web-search",
+  "description": "Native OpenClaw web_search and web_fetch providers for Camofox Web Search",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/idefav/web-search.git",
-    "directory": "plugins/pi"
+    "directory": "plugins/openclaw"
   },
   "homepage": "https://github.com/idefav/web-search#readme",
   "bugs": {
@@ -22,7 +22,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "openclaw.plugin.json",
+    "README.md"
   ],
   "publishConfig": {
     "access": "public"
@@ -31,12 +33,22 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "camofox-web-search-client": "0.0.4",
     "@sinclair/typebox": "0.34.41"
   },
-  "pi": {
+  "peerDependencies": {
+    "openclaw": ">=2026.7.1"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "openclaw": {
     "extensions": [
       "./dist/index.js"
-    ]
+    ],
+    "install": {
+      "minHostVersion": ">=2026.7.1"
+    }
   }
 }

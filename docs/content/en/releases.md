@@ -2,6 +2,15 @@
 
 Release tags pin the source, npm packages, and GHCR image to the same version. Production deployments should never mix versions.
 
+## v0.0.4 — Native OpenClaw and HermesAgent providers
+
+- Adds `camofox-web-search-openclaw` with canonical native `web_search` and `web_fetch` providers.
+- Adds the `camofox-web-search-hermes` PyPI plugin with canonical `web_search` and `web_extract` providers.
+- Extends the CLI, examples, CI, npm Trusted Publishing, and PyPI Trusted Publishing workflows.
+- Adds real OpenClaw 2026.7.1 and HermesAgent 0.19 host compatibility checks plus Docker provider E2E.
+
+[GitHub Release v0.0.4](https://github.com/idefav/web-search/releases/tag/v0.0.4) · [Compare v0.0.3...v0.0.4](https://github.com/idefav/web-search/compare/v0.0.3...v0.0.4)
+
 ## v0.0.3 — WeChat fetch readiness
 
 - Waits once through transient WeChat Official Account verification interstitials and empty or iframe-only snapshots.

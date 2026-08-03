@@ -7,7 +7,7 @@ const errorResponse = {
 
 export const openapi = {
   openapi: "3.1.0",
-  info: { title: "Camofox Web Search API", version: "0.0.3" },
+  info: { title: "Camofox Web Search API", version: "0.0.4" },
   components: {
     securitySchemes: { bearerAuth: { type: "http", scheme: "bearer" } },
     schemas: {

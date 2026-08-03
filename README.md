@@ -2,25 +2,26 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · [Documentation](https://idefav.github.io/web-search/en/) · [Long-form article (中文)](https://idefav.github.io/web-search/zh-CN/article/)
 
-A self-hosted, remote-first `web_search` and `web_fetch` service for Codex, Claude Code, OpenCode, Pi, and custom Agents. It wraps the pinned Camofox Browser REST API without maintaining a fork and exposes authenticated REST plus stateless Streamable HTTP MCP.
+A self-hosted, remote-first Web Search service for Codex, Claude Code, OpenCode, Pi, OpenClaw, HermesAgent, and custom Agents. It wraps the pinned Camofox Browser REST API without maintaining a fork and exposes authenticated REST, stateless Streamable HTTP MCP, and native provider plugins.
 
 ## Why Camofox Web Search
 
-- **One service for every Agent:** connect Codex, Claude Code, OpenCode, Pi, LangChain, or any MCP/REST client to the same endpoint.
+- **One service for every Agent:** connect Codex, Claude Code, OpenCode, Pi, OpenClaw, HermesAgent, LangChain, or any MCP/REST client to the same endpoint.
+- **Canonical native tools:** OpenClaw keeps `web_search`/`web_fetch`, HermesAgent keeps `web_search`/`web_extract`, and both use the same self-hosted gateway.
 - **Browser-backed search and fetch:** render JavaScript pages through Camofox instead of relying on a search API key, while keeping the browser implementation pinned and replaceable.
 - **Resilient multi-provider search:** DuckDuckGo, Brave, Bing, and Google are pluggable and ordered; blocked providers enter cooldown and automatically fall through to the next provider.
 - **Safer by design:** only read-only tools are exposed, Bearer authentication is mandatory, outbound traffic is isolated behind an SSRF-filtering proxy, and web content is explicitly marked untrusted.
-- **Deployment and integration included:** version-pinned Docker Compose, multi-architecture GHCR images, typed REST client, OpenAPI contract, Agent installer, Pi plugin, and runnable examples ship together.
+- **Deployment and integration included:** version-pinned Docker Compose, multi-architecture GHCR images, typed REST client, OpenAPI contract, Agent installer, native Pi/OpenClaw/HermesAgent plugins, and runnable examples ship together.
 - **Observable and automation-friendly:** structured errors, health checks, Prometheus metrics, stateless MCP, deterministic package versions, and real Docker E2E are part of the supported path.
 
-## What's new in v0.0.3
+## What's new in v0.0.4
 
-- Improved WeChat Official Account article fetching with a bounded readiness wait for transient verification interstitials and empty or iframe-only snapshots.
-- Added typed, retryable `fetch_blocked` responses with HTTP 503 and `Retry-After` when interactive verification persists.
-- Removed temporary WeChat `poc_token` values from returned final URLs while retaining final-URL SSRF validation.
-- Added configurable fetch readiness timeout, structured readiness logs, Prometheus metrics, bilingual guidance, and real WeChat Docker E2E coverage.
+- Added a native OpenClaw npm plugin that preserves the canonical `web_search` and `web_fetch` tools.
+- Added a native HermesAgent PyPI provider for `web_search` and `web_extract`.
+- Extended the CLI with managed installation, diagnostics, conflict checks, and safe provider restoration for both Agents.
+- Added runnable examples, bilingual documentation, real host compatibility tests, Docker provider E2E, and npm/PyPI Trusted Publishing.
 
-Read the complete [v0.0.3 release notes](https://github.com/idefav/web-search/releases/tag/v0.0.3) or browse [all releases](https://github.com/idefav/web-search/releases).
+Read the complete [v0.0.4 release notes](https://github.com/idefav/web-search/releases/tag/v0.0.4) or browse [all releases](https://github.com/idefav/web-search/releases).
 
 ## Architecture
 
@@ -31,6 +32,8 @@ Read the complete [v0.0.3 release notes](https://github.com/idefav/web-search/re
 - `packages/client`: typed REST client.
 - `packages/cli`: idempotent Agent configuration installer.
 - `plugins/pi`: native Pi tools.
+- `plugins/openclaw`: native OpenClaw search/fetch providers, published to npm.
+- `plugins/hermes`: native HermesAgent search/extract provider, published to PyPI.
 - `deploy`: pinned Docker deployment with isolated browser networking.
 - `examples`: manual Agent configurations and a custom LangChain Deep Agents research Agent.
 
@@ -41,7 +44,7 @@ Only the two high-level, read-only tools are exposed. Browser clicking, typing, 
 The supported production path is Docker Compose on a 64-bit Linux host with Docker Engine, Compose v2, Git, and OpenSSL. Use the same version for the source tag and GHCR image:
 
 ```bash
-VERSION="0.0.3"
+VERSION="0.0.4"
 git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
 cd web-search
 WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
@@ -73,9 +76,11 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search doctor codex --endpoint https://search.example.com --scope user
 ```
 
-Replace `codex` with `claude`, `opencode`, or `pi` as needed. The installer stores only the endpoint and an environment-variable reference, never the token. Use `--dry-run` to inspect changes, `--force` to replace a conflicting managed entry, and `doctor --live` to include a real search.
+Replace `codex` with `claude`, `opencode`, `pi`, `openclaw`, or `hermes` as needed. The installer stores only the endpoint and an environment-variable reference, never the token. OpenClaw and HermesAgent native plugins are user-scoped. Use `--dry-run` to inspect changes, `--force` to replace a conflicting managed entry, and `doctor --live` to include a real search.
 
 For Pi, installation also runs `pi install npm:camofox-web-search-pi` and configures the native REST-backed tools.
+
+OpenClaw installs `camofox-web-search-openclaw` and registers native `web_search`/`web_fetch` providers. HermesAgent installs `camofox-web-search-hermes` into its Python environment and registers native `web_search`/`web_extract`; pass `--hermes-python` for a non-standard environment.
 
 ## API
 
@@ -105,6 +110,8 @@ The recording shows the custom LangChain Deep Agents example discovering and cal
 
 - [`examples/deepagents`](./examples/deepagents): runnable Python 3.11+ custom research Agent using MCP or REST tools, with standard LangChain models or a custom OpenAI-compatible provider.
 - [`examples/agent-configs`](./examples/agent-configs): exact Codex, Claude Code, OpenCode, and Pi manual configuration examples.
+- [`examples/openclaw`](./examples/openclaw): managed and manual OpenClaw native-provider integration.
+- [`examples/hermes`](./examples/hermes): managed and manual HermesAgent native-provider integration.
 
 The [examples guide](https://idefav.github.io/web-search/en/examples/) also includes direct REST calls. The CLI remains the recommended Agent installation path.
 
@@ -136,10 +143,10 @@ With the full Docker stack running, `npm run e2e:docker` validates REST authenti
 
 ## Release delivery
 
-- `CI`: TypeScript, unit tests, docs build, Deep Agents offline tests, package dry-runs, Compose validation, and gateway image build.
+- `CI`: TypeScript, unit tests, docs, Deep Agents, OpenClaw/HermesAgent host compatibility, package dry-runs, Compose validation, and gateway image build.
 - `GitHub Pages`: builds and publishes the bilingual site after relevant changes reach `main`.
-- `Release`: publishes a multi-architecture GHCR image and the four npm packages through Trusted Publishing and OIDC.
-- `Docker E2E`: runs the real pinned browser stack weekly and on demand.
+- `Release`: publishes the multi-architecture GHCR image, five npm packages, and the HermesAgent PyPI package through Trusted Publishing and OIDC.
+- `Docker E2E`: runs the real pinned browser stack plus OpenClaw and HermesAgent native providers weekly and on demand.
 
 See the [deployment guide](https://idefav.github.io/web-search/en/deployment/) for upgrades and rollback, and the existing release workflow for npm/GHCR publication.
 

@@ -48,6 +48,12 @@ jobs:
           npm pack --dry-run --workspace camofox-web-search-client
           npm pack --dry-run --workspace camofox-web-search
           npm pack --dry-run --workspace camofox-web-search-pi
+          npm pack --dry-run --workspace camofox-web-search-openclaw
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.11"
+      - run: uv build plugins/hermes
+      - run: uvx twine check plugins/hermes/dist/*
 
   container:
     needs: validate
@@ -130,3 +136,26 @@ jobs:
           publish_workspace packages/client
           publish_workspace packages/cli
           publish_workspace plugins/pi
+          publish_workspace plugins/openclaw
+
+  pypi:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.11"
+      - run: uv build plugins/hermes
+      - name: Publish HermesAgent plugin through PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: plugins/hermes/dist/
+          skip-existing: true

@@ -15,6 +15,32 @@ async function workspace(): Promise<string> {
 }
 
 describe("agent config installers", () => {
+  it("prints native provider commands without persisting secrets in dry-run mode", async () => {
+    const cwd = await workspace();
+    const chunks: string[] = [];
+    const original = process.stdout.write.bind(process.stdout);
+    process.stdout.write = ((chunk: string | Uint8Array) => { chunks.push(String(chunk)); return true; }) as typeof process.stdout.write;
+    try {
+      await updateTarget({ target: "openclaw", scope: "user", endpoint: "https://search.example", cwd, force: false, dryRun: true, version: "9.8.7" });
+      await updateTarget({ target: "hermes", scope: "user", endpoint: "https://search.example", cwd, force: false, dryRun: true, version: "9.8.7" });
+    } finally {
+      process.stdout.write = original;
+    }
+    const output = chunks.join("");
+    expect(output).toContain("camofox-web-search-openclaw@9.8.7");
+    expect(output).toContain("camofox-web-search-hermes==9.8.7");
+    expect(output).toContain("WEB_SEARCH_API_KEY");
+    expect(output).not.toContain("Bearer ");
+  });
+
+  it("rejects project-scoped native provider installation", async () => {
+    const cwd = await workspace();
+    await expect(updateTarget({ target: "openclaw", scope: "project", endpoint: "https://search.example", cwd, force: false, dryRun: true }))
+      .rejects.toThrow("only --scope user");
+    await expect(updateTarget({ target: "hermes", scope: "project", endpoint: "https://search.example", cwd, force: false, dryRun: true }))
+      .rejects.toThrow("only --scope user");
+  });
+
   it("installs Codex idempotently and removes only its managed block", async () => {
     const cwd = await workspace();
     const options = { target: "codex" as const, scope: "project" as const, endpoint: "https://search.example", cwd, force: false, dryRun: false };

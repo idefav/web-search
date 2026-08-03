@@ -1,6 +1,6 @@
 # One Web Search for every coding Agent
 
-Camofox Web Search is a self-hosted, read-only `web_search` and `web_fetch` service for Codex, Claude Code, OpenCode, Pi, and custom Agents. It exposes authenticated REST and stateless Streamable HTTP MCP on top of a pinned Camofox Browser deployment.
+Camofox Web Search is a self-hosted, read-only Web Search service for Codex, Claude Code, OpenCode, Pi, OpenClaw, HermesAgent, and custom Agents. It exposes authenticated REST, stateless Streamable HTTP MCP, and native provider plugins on top of a pinned Camofox Browser deployment.
 
 <div class="badges"><span>Multi-provider Search</span><span>MCP + REST</span><span>SSRF Guard</span><span>Bearer Auth</span></div>
 
@@ -9,19 +9,20 @@ Camofox Web Search is a self-hosted, read-only `web_search` and `web_fetch` serv
 ## Project highlights
 
 <div class="release-grid">
-<article><h3>One Agent endpoint</h3><p>Codex, Claude Code, OpenCode, Pi, LangChain, and custom MCP or REST clients share one authenticated service.</p></article>
+<article><h3>One Agent endpoint</h3><p>Codex, Claude Code, OpenCode, Pi, OpenClaw, HermesAgent, LangChain, and custom clients share one authenticated service.</p></article>
+<article><h3>Canonical native tools</h3><p>OpenClaw keeps web_search/web_fetch; HermesAgent keeps web_search/web_extract.</p></article>
 <article><h3>Resilient search</h3><p>Four pluggable providers, ordered fallback, cooldown circuit breaking, and Google single-flight protection.</p></article>
 <article><h3>Browser-backed fetch</h3><p>Camofox renders JavaScript pages and performs a bounded readiness retry for transient page placeholders.</p></article>
 <article><h3>Read-only security</h3><p>Bearer auth, SSRF-filtered egress, untrusted-content boundaries, and no browser interaction or login tools.</p></article>
-<article><h3>Complete delivery</h3><p>Docker Compose, multi-arch GHCR images, OpenAPI, TypeScript client, CLI installer, and Pi plugin.</p></article>
+<article><h3>Complete delivery</h3><p>Docker Compose, GHCR, OpenAPI, TypeScript client, CLI, and native Pi/OpenClaw/HermesAgent plugins.</p></article>
 <article><h3>Production signals</h3><p>Typed errors, health checks, Prometheus metrics, structured logs, CI, and real Docker E2E.</p></article>
 </div>
 
 ## Latest release: v{{version}}
 
-Version 0.0.3 improves WeChat Official Account article fetching, returns retryable `fetch_blocked` errors for persistent verification pages, strips temporary `poc_token` values from final URLs, and adds readiness telemetry plus real WeChat Docker E2E coverage.
+Version 0.0.4 adds native OpenClaw `web_search`/`web_fetch` and HermesAgent `web_search`/`web_extract` providers, managed CLI installation and diagnostics, runnable examples, real host compatibility tests, and registry Trusted Publishing.
 
-[Read the release notes](/en/releases/) or open the [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.3).
+[Read the release notes](/en/releases/) or open the [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.4).
 
 ## Architecture
 
@@ -42,7 +43,7 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search doctor codex --endpoint https://search.example.com --scope user
 ```
 
-The installer also supports `claude`, `opencode`, and `pi`. It stores only the endpoint and an environment-variable reference, never the token.
+The installer also supports `claude`, `opencode`, `pi`, `openclaw`, and `hermes`. It stores only the endpoint and an environment-variable reference, never the token.
 
 ## Interfaces
 
@@ -50,6 +51,8 @@ The installer also supports `claude`, `opencode`, and `pi`. It stores only the e
 | --- | --- | --- |
 | MCP | `/mcp` | Codex, Claude Code, OpenCode, and custom MCP clients |
 | REST | `/v1/search`, `/v1/fetch` | Pi and application integrations |
+| OpenClaw | `camofox-web-search-openclaw` | Native `web_search` and `web_fetch` providers |
+| HermesAgent | `camofox-web-search-hermes` | Native `web_search` and `web_extract` providers |
 | TypeScript | `camofox-web-search-client` | Typed Node.js applications |
 | OpenAPI | `/openapi.json` | Contract discovery and client generation |
 

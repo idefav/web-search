@@ -1,0 +1,7 @@
+web:
+  search_backend: camofox
+  extract_backend: camofox
+
+WEB_SEARCH_ENDPOINT: https://search.example.com
+
+# WEB_SEARCH_API_KEY is intentionally not written by the installer.

@@ -5,6 +5,7 @@
     { "path": "packages/client" },
     { "path": "apps/server" },
     { "path": "packages/cli" },
-    { "path": "plugins/pi" }
+    { "path": "plugins/pi" },
+    { "path": "plugins/openclaw" }
   ]
 }

@@ -14,6 +14,8 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search install claude --endpoint https://search.example.com --scope project
 camofox-web-search install opencode --endpoint https://search.example.com --scope user
 camofox-web-search install pi --endpoint https://search.example.com --scope user
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
 ```
 
 | Agent | Example | Destination |
@@ -22,6 +24,8 @@ camofox-web-search install pi --endpoint https://search.example.com --scope user
 | Claude Code | `claude.json` | `~/.claude.json` or `.mcp.json` |
 | OpenCode | `opencode.jsonc` | `~/.config/opencode/opencode.jsonc` or `opencode.jsonc` |
 | Pi | `pi.json` | `~/.config/camofox-web-search/pi.json` or `.camofox-web-search/pi.json` |
+| OpenClaw | [`../openclaw/openclaw.json5`](../openclaw/openclaw.json5) | `~/.openclaw/openclaw.json` plus the npm plugin |
+| HermesAgent | [`../hermes/config.yaml`](../hermes/config.yaml) | `~/.hermes/config.yaml` plus the PyPI plugin |
 
 Pi also requires the native extension:
 

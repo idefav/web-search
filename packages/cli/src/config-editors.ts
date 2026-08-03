@@ -3,8 +3,9 @@ import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 import { applyEdits, modify, parse } from "jsonc-parser";
 import { spawnSync } from "node:child_process";
+import { mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 
-export type Target = "codex" | "claude" | "opencode" | "pi";
+export type Target = "codex" | "claude" | "opencode" | "pi" | "openclaw" | "hermes";
 export type Scope = "user" | "project";
 
 export interface InstallOptions {
@@ -15,6 +16,10 @@ export interface InstallOptions {
   force: boolean;
   dryRun: boolean;
   piPackage?: string;
+  openclawPackage?: string;
+  hermesPackage?: string;
+  hermesPython?: string;
+  version?: string;
 }
 
 const begin = "# BEGIN camofox-web-search";
@@ -43,7 +48,9 @@ function configPath(target: Target, scope: Scope, cwd: string): string {
   if (target === "codex") return scope === "user" ? join(homedir(), ".codex", "config.toml") : join(cwd, ".codex", "config.toml");
   if (target === "claude") return scope === "user" ? join(homedir(), ".claude.json") : join(cwd, ".mcp.json");
   if (target === "opencode") return scope === "user" ? join(homedir(), ".config", "opencode", "opencode.jsonc") : join(cwd, "opencode.jsonc");
-  return scope === "user" ? join(homedir(), ".config", "camofox-web-search", "pi.json") : join(cwd, ".camofox-web-search", "pi.json");
+  if (target === "pi") return scope === "user" ? join(homedir(), ".config", "camofox-web-search", "pi.json") : join(cwd, ".camofox-web-search", "pi.json");
+  if (target === "openclaw") return join(process.env.OPENCLAW_STATE_DIR ?? join(homedir(), ".openclaw"), "openclaw.json");
+  return join(process.env.HERMES_HOME ?? join(homedir(), ".hermes"), "config.yaml");
 }
 
 async function installCodex(options: InstallOptions, remove: boolean): Promise<void> {
@@ -104,11 +111,189 @@ function runPi(args: string[], cwd: string): void {
   if (result.status !== 0) throw new Error(`pi ${args[0]} failed with exit code ${result.status}`);
 }
 
+function quote(value: string): string {
+  return /[^A-Za-z0-9_./:@=-]/.test(value) ? JSON.stringify(value) : value;
+}
+
+function runExternal(command: string, args: string[], cwd: string, dryRun: boolean): void {
+  if (dryRun) {
+    process.stdout.write(`[dry-run] ${command} ${args.map(quote).join(" ")}\n`);
+    return;
+  }
+  const result = spawnSync(command, args, { cwd, stdio: "inherit" });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`${command} ${args[0] ?? ""} failed with exit code ${result.status}`);
+}
+
+function readExternal(command: string, args: string[], cwd: string): string | undefined {
+  const result = spawnSync(command, args, { cwd, encoding: "utf8" });
+  if (result.error) throw result.error;
+  if (result.status !== 0) return undefined;
+  const output = result.stdout.trim();
+  if (!output) return undefined;
+  try {
+    const parsed = JSON.parse(output) as unknown;
+    return typeof parsed === "string" ? parsed : JSON.stringify(parsed);
+  } catch {
+    return output;
+  }
+}
+
+function requireReplace(current: string | undefined, desired: string, force: boolean, label: string): void {
+  if (current && current !== desired && !force) throw new Error(`${label} is already set to ${current}; use --force to replace it`);
+}
+
+interface ManagedNativeState {
+  endpoint: string;
+  previous: Record<string, string | undefined>;
+}
+
+function managedStatePath(target: "openclaw" | "hermes", options: InstallOptions): string {
+  return join(dirname(configPath(target, "user", options.cwd)), `.camofox-web-search-${target}.json`);
+}
+
+function readManagedState(target: "openclaw" | "hermes", options: InstallOptions): ManagedNativeState | undefined {
+  try {
+    return JSON.parse(readFileSync(managedStatePath(target, options), "utf8")) as ManagedNativeState;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+function writeManagedState(target: "openclaw" | "hermes", options: InstallOptions, state: ManagedNativeState): void {
+  if (options.dryRun) return;
+  const path = managedStatePath(target, options);
+  mkdirSync(dirname(path), { recursive: true });
+  const temporary = `${path}.tmp-${process.pid}`;
+  writeFileSync(temporary, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
+  renameSync(temporary, path);
+}
+
+function removeManagedState(target: "openclaw" | "hermes", options: InstallOptions): void {
+  if (options.dryRun) return;
+  try {
+    unlinkSync(managedStatePath(target, options));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+}
+
+function restoreExternal(command: string, path: string, previous: string | undefined, cwd: string, dryRun: boolean): void {
+  runExternal(command, ["config", previous === undefined ? "unset" : "set", path, ...(previous === undefined ? [] : [previous])], cwd, dryRun);
+}
+
+function commandExists(command: string): boolean {
+  const result = spawnSync(command, ["--version"], { encoding: "utf8", stdio: "ignore" });
+  return !result.error && result.status === 0;
+}
+
+function detectHermesPython(options: InstallOptions): string {
+  if (options.hermesPython) return options.hermesPython;
+  if (process.env.HERMES_PYTHON) return process.env.HERMES_PYTHON;
+  const hermes = spawnSync(process.env.HERMES_BIN ?? "hermes", ["--version"], { encoding: "utf8" });
+  const path = hermes.error ? undefined : spawnSync("which", [process.env.HERMES_BIN ?? "hermes"], { encoding: "utf8" }).stdout.trim();
+  if (path) {
+    const first = spawnSync("head", ["-n", "1", path], { encoding: "utf8" }).stdout.trim();
+    const match = first.match(/^#!\s*(\S*python\S*)/);
+    if (match?.[1]) return match[1];
+  }
+  const candidate = join(process.env.HERMES_HOME ?? join(homedir(), ".hermes"), "hermes-agent", ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+  if (!spawnSync(candidate, ["--version"], { stdio: "ignore" }).error) return candidate;
+  throw new Error("Could not locate the HermesAgent Python interpreter; pass --hermes-python or set HERMES_PYTHON");
+}
+
+function installOpenClaw(options: InstallOptions, remove: boolean): void {
+  if (options.scope !== "user") throw new Error("OpenClaw native plugins support only --scope user");
+  const binary = process.env.OPENCLAW_BIN ?? "openclaw";
+  const source = options.openclawPackage ?? process.env.CAMOFOX_WEB_SEARCH_OPENCLAW_PACKAGE ?? `npm:camofox-web-search-openclaw@${options.version ?? "0.0.4"}`;
+  if (remove) {
+    const state = readManagedState("openclaw", options);
+    if (options.dryRun || readExternal(binary, ["config", "get", "tools.web.search.provider", "--json"], options.cwd) === "camofox") {
+      restoreExternal(binary, "tools.web.search.provider", state?.previous.searchProvider, options.cwd, options.dryRun);
+    }
+    if (options.dryRun || readExternal(binary, ["config", "get", "tools.web.fetch.provider", "--json"], options.cwd) === "camofox") {
+      restoreExternal(binary, "tools.web.fetch.provider", state?.previous.fetchProvider, options.cwd, options.dryRun);
+    }
+    for (const path of [
+      "plugins.entries.camofox.config.webSearch.apiKey",
+      "plugins.entries.camofox.config.webFetch.apiKey",
+      "plugins.entries.camofox.config.endpoint"
+    ]) {
+      if (options.dryRun || readExternal(binary, ["config", "get", path, "--json"], options.cwd) !== undefined) {
+        runExternal(binary, ["config", "unset", path], options.cwd, options.dryRun);
+      }
+    }
+    if (options.dryRun || readExternal(binary, ["plugins", "inspect", "camofox", "--runtime", "--json"], options.cwd) !== undefined) {
+      runExternal(binary, ["plugins", "uninstall", "camofox", "--force"], options.cwd, options.dryRun);
+    }
+    removeManagedState("openclaw", options);
+    return;
+  }
+  const existingState = readManagedState("openclaw", options);
+  const searchProvider = options.dryRun ? undefined : readExternal(binary, ["config", "get", "tools.web.search.provider", "--json"], options.cwd);
+  const fetchProvider = options.dryRun ? undefined : readExternal(binary, ["config", "get", "tools.web.fetch.provider", "--json"], options.cwd);
+  if (!options.dryRun) {
+    requireReplace(searchProvider, "camofox", options.force, "OpenClaw web search provider");
+    requireReplace(fetchProvider, "camofox", options.force, "OpenClaw web fetch provider");
+    writeManagedState("openclaw", options, existingState ? { ...existingState, endpoint: options.endpoint } : { endpoint: options.endpoint, previous: { searchProvider, fetchProvider } });
+  }
+  runExternal(binary, ["plugins", "install", source, "--force"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "plugins.entries.camofox.config.endpoint", options.endpoint], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "plugins.entries.camofox.config.webSearch.apiKey", "--ref-source", "env", "--ref-provider", "default", "--ref-id", "WEB_SEARCH_API_KEY"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "plugins.entries.camofox.config.webFetch.apiKey", "--ref-source", "env", "--ref-provider", "default", "--ref-id", "WEB_SEARCH_API_KEY"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "tools.web.search.provider", "camofox"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "tools.web.fetch.provider", "camofox"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "validate"], options.cwd, options.dryRun);
+  process.stdout.write("Restart the OpenClaw gateway, then run: openclaw plugins inspect camofox --runtime --json\n");
+}
+
+function installHermes(options: InstallOptions, remove: boolean): void {
+  if (options.scope !== "user") throw new Error("HermesAgent native plugins support only --scope user");
+  const binary = process.env.HERMES_BIN ?? "hermes";
+  const python = options.dryRun && !options.hermesPython && !process.env.HERMES_PYTHON ? "<hermes-python>" : detectHermesPython(options);
+  const source = options.hermesPackage ?? process.env.CAMOFOX_WEB_SEARCH_HERMES_PACKAGE ?? `camofox-web-search-hermes==${options.version ?? "0.0.4"}`;
+  if (remove) {
+    const state = readManagedState("hermes", options);
+    if (options.dryRun || readExternal(binary, ["config", "get", "web.search_backend"], options.cwd) === "camofox") {
+      restoreExternal(binary, "web.search_backend", state?.previous.searchBackend, options.cwd, options.dryRun);
+    }
+    if (options.dryRun || readExternal(binary, ["config", "get", "web.extract_backend"], options.cwd) === "camofox") {
+      restoreExternal(binary, "web.extract_backend", state?.previous.extractBackend, options.cwd, options.dryRun);
+    }
+    if (options.dryRun || readExternal(binary, ["config", "get", "WEB_SEARCH_ENDPOINT"], options.cwd) === state?.endpoint) {
+      restoreExternal(binary, "WEB_SEARCH_ENDPOINT", state?.previous.endpoint, options.cwd, options.dryRun);
+    }
+    runExternal(binary, ["plugins", "disable", "camofox-web-search"], options.cwd, options.dryRun);
+    if (commandExists("uv")) runExternal("uv", ["pip", "uninstall", "--python", python, "camofox-web-search-hermes"], options.cwd, options.dryRun);
+    else runExternal(python, ["-m", "pip", "uninstall", "-y", "camofox-web-search-hermes"], options.cwd, options.dryRun);
+    removeManagedState("hermes", options);
+    return;
+  }
+  const existingState = readManagedState("hermes", options);
+  const searchBackend = options.dryRun ? undefined : readExternal(binary, ["config", "get", "web.search_backend"], options.cwd);
+  const extractBackend = options.dryRun ? undefined : readExternal(binary, ["config", "get", "web.extract_backend"], options.cwd);
+  const previousEndpoint = options.dryRun ? undefined : readExternal(binary, ["config", "get", "WEB_SEARCH_ENDPOINT"], options.cwd);
+  if (!options.dryRun) {
+    requireReplace(searchBackend, "camofox", options.force, "HermesAgent web search backend");
+    requireReplace(extractBackend, "camofox", options.force, "HermesAgent web extract backend");
+    writeManagedState("hermes", options, existingState ? { ...existingState, endpoint: options.endpoint } : { endpoint: options.endpoint, previous: { searchBackend, extractBackend, endpoint: previousEndpoint } });
+  }
+  if (commandExists("uv")) runExternal("uv", ["pip", "install", "--python", python, source], options.cwd, options.dryRun);
+  else runExternal(python, ["-m", "pip", "install", source], options.cwd, options.dryRun);
+  runExternal(binary, ["plugins", "enable", "camofox-web-search", "--no-allow-tool-override"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "WEB_SEARCH_ENDPOINT", options.endpoint, "--force"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "web.search_backend", "camofox"], options.cwd, options.dryRun);
+  runExternal(binary, ["config", "set", "web.extract_backend", "camofox"], options.cwd, options.dryRun);
+}
+
 export async function updateTarget(options: InstallOptions, remove = false): Promise<void> {
   if (options.target === "codex") return installCodex(options, remove);
   if (options.target === "claude") return installClaude(options, remove);
   if (options.target === "opencode") return installOpenCode(options, remove);
-  return installPi(options, remove);
+  if (options.target === "pi") return installPi(options, remove);
+  if (options.target === "openclaw") return installOpenClaw(options, remove);
+  return installHermes(options, remove);
 }
 
-export { configPath };
+export { configPath, detectHermesPython };

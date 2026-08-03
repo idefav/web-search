@@ -2,6 +2,15 @@
 
 Release tag 会把源码、npm 包和 GHCR 镜像固定为同一个版本。生产部署不应混用不同版本。
 
+## v0.0.4 — OpenClaw 与 HermesAgent 原生 Provider
+
+- 增加 `camofox-web-search-openclaw`，提供标准原生 `web_search` 和 `web_fetch`。
+- 增加 PyPI 包 `camofox-web-search-hermes`，提供标准原生 `web_search` 和 `web_extract`。
+- 扩展 CLI、示例、CI、npm Trusted Publishing 和 PyPI Trusted Publishing 流程。
+- 增加真实 OpenClaw 2026.7.1、HermesAgent 0.19 宿主兼容检查与 Docker Provider E2E。
+
+[GitHub Release v0.0.4](https://github.com/idefav/web-search/releases/tag/v0.0.4) · [比较 v0.0.3...v0.0.4](https://github.com/idefav/web-search/compare/v0.0.3...v0.0.4)
+
 ## v0.0.3 — 微信抓取就绪等待
 
 - 微信公众号文章短暂经过验证中间页，或 snapshot 为空、只有 iframe 时，执行一次有界就绪等待。

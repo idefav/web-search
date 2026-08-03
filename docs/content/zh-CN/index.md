@@ -1,6 +1,6 @@
 # 给所有 Coding Agent 同一个 Web Search
 
-Camofox Web Search 是一个可自托管、只读的 `web_search` 与 `web_fetch` 服务，可供 Codex、Claude Code、OpenCode、Pi 和自定义 Agent 使用。服务基于固定版本的 Camofox Browser，同时提供带认证的 REST 与无状态 Streamable HTTP MCP 接口。
+Camofox Web Search 是一个可自托管、只读的 Web Search 服务，可供 Codex、Claude Code、OpenCode、Pi、OpenClaw、HermesAgent 和自定义 Agent 使用。服务基于固定版本的 Camofox Browser，同时提供带认证的 REST、无状态 Streamable HTTP MCP 与原生 Provider 插件。
 
 <div class="badges"><span>多 Provider 搜索</span><span>MCP + REST</span><span>SSRF 防护</span><span>Bearer 认证</span></div>
 
@@ -11,19 +11,20 @@ Camofox Web Search 是一个可自托管、只读的 `web_search` 与 `web_fetch
 ## 项目特色
 
 <div class="release-grid">
-<article><h3>一个 Agent endpoint</h3><p>Codex、Claude Code、OpenCode、Pi、LangChain 和自定义 MCP/REST 客户端共用一个认证服务。</p></article>
+<article><h3>一个 Agent endpoint</h3><p>Codex、Claude Code、OpenCode、Pi、OpenClaw、HermesAgent、LangChain 和自定义客户端共用一个认证服务。</p></article>
+<article><h3>保留原生工具</h3><p>OpenClaw 使用 web_search/web_fetch，HermesAgent 使用 web_search/web_extract。</p></article>
 <article><h3>搜索自动容错</h3><p>四个可插拔 Provider、顺序回退、冷却熔断，以及 Google 单并发保护。</p></article>
 <article><h3>浏览器驱动抓取</h3><p>Camofox 可渲染 JavaScript 页面，并对短暂页面占位执行有界就绪重试。</p></article>
 <article><h3>只读安全边界</h3><p>Bearer 认证、SSRF 出站防护、不可信内容边界，不提供浏览器交互或登录工具。</p></article>
-<article><h3>完整交付链路</h3><p>Docker Compose、多架构 GHCR、OpenAPI、TypeScript 客户端、CLI 安装器和 Pi 插件。</p></article>
+<article><h3>完整交付链路</h3><p>Docker Compose、GHCR、OpenAPI、TypeScript 客户端、CLI 与 Pi/OpenClaw/HermesAgent 原生插件。</p></article>
 <article><h3>生产可观测</h3><p>类型化错误、健康检查、Prometheus metrics、结构化日志、CI 和真实 Docker E2E。</p></article>
 </div>
 
 ## 最新版本：v{{version}}
 
-0.0.3 优化了微信公众号文章抓取；持续存在验证页时会返回可重试的 `fetch_blocked`；最终 URL 会移除临时 `poc_token`；同时增加了就绪等待 telemetry 和真实微信 Docker E2E。
+0.0.4 增加 OpenClaw 原生 `web_search`/`web_fetch` 与 HermesAgent 原生 `web_search`/`web_extract` Provider，并提供 CLI 受管安装和诊断、可运行示例、真实宿主兼容测试与 registry Trusted Publishing。
 
-[查看 Release Notes](/zh-CN/releases/)或打开 [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.3)。
+[查看 Release Notes](/zh-CN/releases/)或打开 [GitHub Release](https://github.com/idefav/web-search/releases/tag/v0.0.4)。
 
 ## 架构
 
@@ -44,7 +45,7 @@ camofox-web-search install codex --endpoint https://search.example.com --scope u
 camofox-web-search doctor codex --endpoint https://search.example.com --scope user
 ```
 
-安装器同样支持 `claude`、`opencode` 和 `pi`。它只写入 endpoint 和环境变量引用，不会把 Token 保存到 Agent 配置中。
+安装器同样支持 `claude`、`opencode`、`pi`、`openclaw` 和 `hermes`。它只写入 endpoint 和环境变量引用，不会把 Token 保存到 Agent 配置中。
 
 ## 对外接口
 
@@ -52,6 +53,8 @@ camofox-web-search doctor codex --endpoint https://search.example.com --scope us
 | --- | --- | --- |
 | MCP | `/mcp` | Codex、Claude Code、OpenCode 与自定义 MCP 客户端 |
 | REST | `/v1/search`、`/v1/fetch` | Pi 与应用程序集成 |
+| OpenClaw | `camofox-web-search-openclaw` | 原生 `web_search` 与 `web_fetch` Provider |
+| HermesAgent | `camofox-web-search-hermes` | 原生 `web_search` 与 `web_extract` Provider |
 | TypeScript | `camofox-web-search-client` | 类型安全的 Node.js 应用 |
 | OpenAPI | `/openapi.json` | 查看契约或生成客户端 |
 
