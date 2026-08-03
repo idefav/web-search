@@ -121,6 +121,9 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Publish packages through npm Trusted Publishing
+        env:
+          # One-time bootstrap fallback for a new package before its npm Trusted Publisher can be configured.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           publish_workspace() {
             workspace="$1"
