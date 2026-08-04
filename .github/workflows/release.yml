@@ -117,14 +117,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          registry-url: https://registry.npmjs.org
       - run: npm install --global npm@12.0.2
       - run: npm ci
       - run: npm run build
       - name: Publish packages through npm Trusted Publishing
-        env:
-          # One-time bootstrap fallback for a new package before its npm Trusted Publisher can be configured.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           publish_workspace() {
             workspace="$1"
