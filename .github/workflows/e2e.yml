@@ -42,7 +42,11 @@ jobs:
       - name: Run HermesAgent native provider E2E
         run: |
           uv venv /tmp/hermes-e2e
-          uv pip install --python /tmp/hermes-e2e/bin/python hermes-agent==0.19.0 plugins/hermes
+          git init /tmp/hermes-agent
+          git -C /tmp/hermes-agent remote add origin https://github.com/NousResearch/hermes-agent.git
+          git -C /tmp/hermes-agent fetch --depth=1 origin 3c27eb6234bf91b8ceee9e9071591b31e9b148cb
+          git -C /tmp/hermes-agent checkout --detach FETCH_HEAD
+          uv pip install --python /tmp/hermes-e2e/bin/python -e /tmp/hermes-agent plugins/hermes
           /tmp/hermes-e2e/bin/python scripts/hermes-provider-smoke.py
       - name: Container logs
         if: failure()

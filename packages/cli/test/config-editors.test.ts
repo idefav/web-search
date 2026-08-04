@@ -1,9 +1,9 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { parse } from "jsonc-parser";
-import { updateTarget } from "../src/config-editors.js";
+import { detectHermesPython, updateTarget } from "../src/config-editors.js";
 
 const temporary: string[] = [];
 afterEach(async () => Promise.all(temporary.splice(0).map((path) => rm(path, { recursive: true, force: true }))));
@@ -15,6 +15,27 @@ async function workspace(): Promise<string> {
 }
 
 describe("agent config installers", () => {
+  it("detects the Python interpreter from the current Hermes shell wrapper", async () => {
+    const cwd = await workspace();
+    const python = join(cwd, "hermes-home", "hermes-agent", "venv", "bin", "python");
+    const hermes = join(cwd, "hermes");
+    await mkdir(join(cwd, "hermes-home", "hermes-agent", "venv", "bin"), { recursive: true });
+    await writeFile(python, "#!/bin/sh\nexit 0\n");
+    await writeFile(hermes, `#!/bin/sh\nexec "${python}" /tmp/hermes "$@"\n`);
+    await chmod(python, 0o755);
+    await chmod(hermes, 0o755);
+    const previousBin = process.env.HERMES_BIN;
+    const previousPython = process.env.HERMES_PYTHON;
+    process.env.HERMES_BIN = hermes;
+    delete process.env.HERMES_PYTHON;
+    try {
+      expect(detectHermesPython({ target: "hermes", scope: "user", endpoint: "https://search.example", cwd, force: false, dryRun: false })).toBe(python);
+    } finally {
+      if (previousBin === undefined) delete process.env.HERMES_BIN; else process.env.HERMES_BIN = previousBin;
+      if (previousPython === undefined) delete process.env.HERMES_PYTHON; else process.env.HERMES_PYTHON = previousPython;
+    }
+  });
+
   it("prints native provider commands without persisting secrets in dry-run mode", async () => {
     const cwd = await workspace();
     const chunks: string[] = [];

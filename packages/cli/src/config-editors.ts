@@ -188,25 +188,50 @@ function commandExists(command: string): boolean {
   return !result.error && result.status === 0;
 }
 
+function hermesHome(): string {
+  return process.env.HERMES_HOME ?? join(homedir(), ".hermes");
+}
+
+function pythonFromLauncher(path: string): string | undefined {
+  try {
+    const content = readFileSync(path, "utf8");
+    const shebang = content.split(/\r?\n/, 1)[0]?.match(/^#!\s*(\S*python\S*)/);
+    if (shebang?.[1]) return shebang[1];
+    const wrapper = content.match(/^\s*exec\s+["']([^"']*python[^"']*)["']/m);
+    return wrapper?.[1];
+  } catch {
+    return undefined;
+  }
+}
+
 function detectHermesPython(options: InstallOptions): string {
   if (options.hermesPython) return options.hermesPython;
   if (process.env.HERMES_PYTHON) return process.env.HERMES_PYTHON;
   const hermes = spawnSync(process.env.HERMES_BIN ?? "hermes", ["--version"], { encoding: "utf8" });
   const path = hermes.error ? undefined : spawnSync("which", [process.env.HERMES_BIN ?? "hermes"], { encoding: "utf8" }).stdout.trim();
   if (path) {
-    const first = spawnSync("head", ["-n", "1", path], { encoding: "utf8" }).stdout.trim();
-    const match = first.match(/^#!\s*(\S*python\S*)/);
-    if (match?.[1]) return match[1];
+    const launcherPython = pythonFromLauncher(path);
+    if (launcherPython && commandExists(launcherPython)) return launcherPython;
   }
-  const candidate = join(process.env.HERMES_HOME ?? join(homedir(), ".hermes"), "hermes-agent", ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
-  if (!spawnSync(candidate, ["--version"], { stdio: "ignore" }).error) return candidate;
+  const binary = process.platform === "win32" ? "Scripts/python.exe" : "bin/python";
+  for (const directory of ["venv", ".venv"]) {
+    const candidate = join(hermesHome(), "hermes-agent", directory, binary);
+    if (commandExists(candidate)) return candidate;
+  }
   throw new Error("Could not locate the HermesAgent Python interpreter; pass --hermes-python or set HERMES_PYTHON");
+}
+
+function detectHermesUv(): string | undefined {
+  for (const candidate of [process.env.UV_BIN, "uv", join(hermesHome(), "bin", process.platform === "win32" ? "uv.exe" : "uv")]) {
+    if (candidate && commandExists(candidate)) return candidate;
+  }
+  return undefined;
 }
 
 function installOpenClaw(options: InstallOptions, remove: boolean): void {
   if (options.scope !== "user") throw new Error("OpenClaw native plugins support only --scope user");
   const binary = process.env.OPENCLAW_BIN ?? "openclaw";
-  const source = options.openclawPackage ?? process.env.CAMOFOX_WEB_SEARCH_OPENCLAW_PACKAGE ?? `npm:camofox-web-search-openclaw@${options.version ?? "0.0.4"}`;
+  const source = options.openclawPackage ?? process.env.CAMOFOX_WEB_SEARCH_OPENCLAW_PACKAGE ?? `npm:camofox-web-search-openclaw@${options.version ?? "0.0.5"}`;
   if (remove) {
     const state = readManagedState("openclaw", options);
     if (options.dryRun || readExternal(binary, ["config", "get", "tools.web.search.provider", "--json"], options.cwd) === "camofox") {
@@ -252,7 +277,8 @@ function installHermes(options: InstallOptions, remove: boolean): void {
   if (options.scope !== "user") throw new Error("HermesAgent native plugins support only --scope user");
   const binary = process.env.HERMES_BIN ?? "hermes";
   const python = options.dryRun && !options.hermesPython && !process.env.HERMES_PYTHON ? "<hermes-python>" : detectHermesPython(options);
-  const source = options.hermesPackage ?? process.env.CAMOFOX_WEB_SEARCH_HERMES_PACKAGE ?? `camofox-web-search-hermes==${options.version ?? "0.0.4"}`;
+  const source = options.hermesPackage ?? process.env.CAMOFOX_WEB_SEARCH_HERMES_PACKAGE ?? `camofox-web-search-hermes==${options.version ?? "0.0.5"}`;
+  const uv = detectHermesUv();
   if (remove) {
     const state = readManagedState("hermes", options);
     if (options.dryRun || readExternal(binary, ["config", "get", "web.search_backend"], options.cwd) === "camofox") {
@@ -265,7 +291,7 @@ function installHermes(options: InstallOptions, remove: boolean): void {
       restoreExternal(binary, "WEB_SEARCH_ENDPOINT", state?.previous.endpoint, options.cwd, options.dryRun);
     }
     runExternal(binary, ["plugins", "disable", "camofox-web-search"], options.cwd, options.dryRun);
-    if (commandExists("uv")) runExternal("uv", ["pip", "uninstall", "--python", python, "camofox-web-search-hermes"], options.cwd, options.dryRun);
+    if (uv) runExternal(uv, ["pip", "uninstall", "--python", python, "camofox-web-search-hermes"], options.cwd, options.dryRun);
     else runExternal(python, ["-m", "pip", "uninstall", "-y", "camofox-web-search-hermes"], options.cwd, options.dryRun);
     removeManagedState("hermes", options);
     return;
@@ -279,7 +305,7 @@ function installHermes(options: InstallOptions, remove: boolean): void {
     requireReplace(extractBackend, "camofox", options.force, "HermesAgent web extract backend");
     writeManagedState("hermes", options, existingState ? { ...existingState, endpoint: options.endpoint } : { endpoint: options.endpoint, previous: { searchBackend, extractBackend, endpoint: previousEndpoint } });
   }
-  if (commandExists("uv")) runExternal("uv", ["pip", "install", "--python", python, source], options.cwd, options.dryRun);
+  if (uv) runExternal(uv, ["pip", "install", "--python", python, source], options.cwd, options.dryRun);
   else runExternal(python, ["-m", "pip", "install", source], options.cwd, options.dryRun);
   runExternal(binary, ["plugins", "enable", "camofox-web-search", "--no-allow-tool-override"], options.cwd, options.dryRun);
   runExternal(binary, ["config", "set", "WEB_SEARCH_ENDPOINT", options.endpoint, "--force"], options.cwd, options.dryRun);

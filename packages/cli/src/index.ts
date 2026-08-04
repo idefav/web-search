@@ -50,8 +50,8 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
     let registered = false;
     if (result.status === 0) {
       try {
-        const plugin = (JSON.parse(result.stdout) as { plugin?: { webSearchProviderIds?: string[]; webFetchProviderIds?: string[] } }).plugin;
-        registered = plugin?.webSearchProviderIds?.includes("camofox") === true && plugin.webFetchProviderIds?.includes("camofox") === true;
+        const plugin = (JSON.parse(result.stdout) as { plugin?: { status?: string; webSearchProviderIds?: string[]; webFetchProviderIds?: string[] } }).plugin;
+        registered = plugin?.status === "loaded" && plugin.webSearchProviderIds?.includes("camofox") === true && plugin.webFetchProviderIds?.includes("camofox") === true;
       } catch {
         registered = false;
       }
@@ -65,7 +65,7 @@ async function doctor(target: Target, scope: Scope, endpoint: string, cwd: strin
     } catch {
       command = "python3";
     }
-    const result = await import("node:child_process").then(({ spawnSync }) => spawnSync(command, ["-c", "from camofox_web_search_hermes import CamofoxWebSearchProvider as P; p=P(); assert p.supports_search() and p.supports_extract(); print(p.name)"], { encoding: "utf8" }));
+    const result = await import("node:child_process").then(({ spawnSync }) => spawnSync(command, ["-c", "from hermes_cli.plugins import discover_plugins; discover_plugins(force=True); from agent.web_search_registry import get_provider; p=get_provider('camofox'); assert p and p.supports_search() and p.supports_extract(); print(p.name)"], { encoding: "utf8" }));
     checks.push({ name: "hermes-provider", ok: result.status === 0 && result.stdout.trim() === "camofox", detail: result.status === 0 ? "camofox search/extract provider importable" : (result.stderr.trim() || "provider import failed; pass --hermes-python") });
   }
   if (live && process.env.WEB_SEARCH_API_KEY) {

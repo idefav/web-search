@@ -1,6 +1,14 @@
 import asyncio
+import tomllib
+from pathlib import Path
 
 from camofox_web_search_hermes import provider as module
+
+
+def test_entrypoint_loads_plugin_module():
+    project = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
+    entrypoint = project["project"]["entry-points"]["hermes_agent.plugins"]["camofox-web-search"]
+    assert entrypoint == "camofox_web_search_hermes"
 
 
 def test_search_maps_public_contract(monkeypatch):

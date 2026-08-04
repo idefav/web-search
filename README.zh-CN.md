@@ -14,14 +14,97 @@
 - **部署与接入完整交付：** 同时提供固定版本 Docker Compose、多架构 GHCR 镜像、类型安全 REST 客户端、OpenAPI、Agent 安装器、Pi/OpenClaw/HermesAgent 原生插件和可运行示例。
 - **可观测、易自动化：** 类型化错误、健康检查、Prometheus metrics、无状态 MCP、统一包版本和真实 Docker E2E 都属于正式支持路径。
 
-## v0.0.4 更新内容
+| Agent | 接入方式 | 原生工具 |
+| --- | --- | --- |
+| Codex、Claude Code、OpenCode | Streamable HTTP MCP | `web_search`、`web_fetch` |
+| Pi | 原生 npm 扩展 | `web_search`、`web_fetch` |
+| OpenClaw | 原生 npm Provider | `web_search`、`web_fetch` |
+| HermesAgent | 原生 Python Provider | `web_search`、`web_extract` |
+| LangChain Deep Agents 与自定义 Agent | MCP、REST 或类型安全客户端 | 由应用定义 |
 
-- 增加 OpenClaw 原生 npm 插件，保留标准 `web_search` 与 `web_fetch` 工具。
-- 增加 HermesAgent 原生 PyPI Provider，提供 `web_search` 与 `web_extract`。
-- CLI 支持两个 Agent 的受管安装、诊断、冲突检查与原 Provider 安全恢复。
-- 增加可运行示例、双语文档、真实宿主兼容测试、Docker Provider E2E，以及 npm/PyPI Trusted Publishing。
+## 为你的 Agent 安装
 
-查看完整的 [v0.0.4 Release Notes](https://github.com/idefav/web-search/releases/tag/v0.0.4)或[全部版本](https://github.com/idefav/web-search/releases)。
+先部署[服务端](https://idefav.github.io/web-search/zh-CN/deployment/)，然后在运行 Agent 的机器上安装配置 CLI：
+
+```bash
+npm install -g camofox-web-search
+export WEB_SEARCH_API_KEY="<通过安全方式从服务端 .env 复制>"
+```
+
+### Codex、Claude Code 与 OpenCode
+
+这三个 Agent 通过 Streamable HTTP MCP 接入，不需要安装额外的原生插件包：
+
+```bash
+camofox-web-search install codex --endpoint https://search.example.com --scope user
+camofox-web-search install claude --endpoint https://search.example.com --scope user
+camofox-web-search install opencode --endpoint https://search.example.com --scope user
+```
+
+重启对应 Agent 后即可让它调用 `web_search`。使用同一 target 的 `doctor` 验证配置：
+
+```bash
+camofox-web-search doctor codex --endpoint https://search.example.com --scope user --live
+```
+
+### Pi
+
+```bash
+camofox-web-search install pi --endpoint https://search.example.com --scope user
+camofox-web-search doctor pi --endpoint https://search.example.com --scope user --live
+pi
+```
+
+安装器会执行 `pi install npm:camofox-web-search-pi`，并配置通过 REST 调用服务端的原生 `web_search` 与 `web_fetch` 工具。
+
+### OpenClaw
+
+```bash
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+# Gateway 作为服务运行时，把 WEB_SEARCH_API_KEY 持久化到 ~/.openclaw/.env。
+openclaw gateway restart
+camofox-web-search doctor openclaw --endpoint https://search.example.com --scope user --live
+openclaw tui
+```
+
+安装器会执行 `openclaw plugins install npm:camofox-web-search-openclaw`、选中原生 Provider，并写入环境变量 SecretRef 而不是 Token。完整说明见 [OpenClaw 指南](https://idefav.github.io/web-search/zh-CN/openclaw/)。
+
+### HermesAgent
+
+```bash
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
+# 把 WEB_SEARCH_API_KEY 持久化到 ~/.hermes/.env。
+camofox-web-search doctor hermes --endpoint https://search.example.com --scope user --live
+hermes -t web chat --tui
+```
+
+安装器会把 `camofox-web-search-hermes` 加入 Hermes Python 环境、启用插件，并选中原生搜索/提取 backend。完整说明见 [HermesAgent 指南](https://idefav.github.io/web-search/zh-CN/hermes/)。
+
+### LangChain Deep Agents 与自定义 Agent
+
+自定义 Agent 可以直接使用 `/mcp`、REST API 或 `camofox-web-search-client`。可运行的 Deep Agents 示例不需要原生插件：
+
+```bash
+cd examples/deepagents
+cp .env.example .env
+uv sync --locked
+uv run --env-file .env python agent.py --transport mcp --stream \
+  "研究 Camofox Browser 并引用主要来源"
+```
+
+详细说明见 [`examples/deepagents`](./examples/deepagents)与[手工 MCP 配置](./examples/agent-configs)。
+
+Codex、Claude Code、OpenCode 与 Pi 也支持 `--scope project`；OpenClaw 与 HermesAgent 插件只支持 user scope。可添加 `--dry-run` 预览改动，或在明确需要替换冲突配置时添加 `--force`。
+
+## v0.0.5 更新内容
+
+- 修复 HermesAgent 0.20 插件发现入口，使其兼容当前插件加载器。
+- CLI 支持发现官方 Hermes Shell 启动器、`venv`/`.venv` 目录与 Hermes 自带的 `uv`，不再要求环境内安装 `pip`。
+- `doctor hermes` 改为验证真实运行时 Provider 注册，而不只是导入插件包。
+- 加强 `doctor openclaw`，插件加载失败时不会再仅凭声明的 Provider ID 误报成功。
+- README 与 GitHub Pages 首页增加全部受支持 Agent 的快捷安装命令，并提供完整的 OpenClaw、HermesAgent 独立指南。
+
+查看完整的 [v0.0.5 Release Notes](https://github.com/idefav/web-search/releases/tag/v0.0.5)或[全部版本](https://github.com/idefav/web-search/releases)。
 
 ## 架构
 
@@ -44,7 +127,7 @@
 生产部署主线是安装了 Docker Engine、Compose v2、Git 和 OpenSSL 的 64 位 Linux 主机。源码 tag 与 GHCR 镜像必须使用同一个版本：
 
 ```bash
-VERSION="0.0.4"
+VERSION="0.0.5"
 git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
 cd web-search
 WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
@@ -66,21 +149,52 @@ Bootstrap 会以 `0600` 权限创建 `.env`，生成不同的公开与内部 Key
 
 `web_fetch` 遇到首次 snapshot 为空或只有 iframe 占位时，会执行一次有界的页面就绪等待，可处理微信公众号链接短暂经过自动验证中间页的情况。验证页未自动恢复时会返回可重试的 `fetch_blocked`；服务不会尝试解决 CAPTCHA。
 
-## 接入 Agent
+## 安装器行为
+
+安装器只保存 endpoint 和环境变量引用，不会保存 Token。它会保留无关设置、为修改的 Agent 配置文件创建备份，并支持幂等重复执行。Codex、Claude Code、OpenCode 与 Pi 的手工配置位于 [`examples/agent-configs`](./examples/agent-configs)。
+
+## OpenClaw 安装与使用
+
+OpenClaw 2026.7.1+ 可以通过原生 Provider 接入，同时保留标准工具名称：
 
 ```bash
-npm install -g camofox-web-search
 export WEB_SEARCH_API_KEY="<通过安全方式从服务端 .env 复制>"
+camofox-web-search install openclaw \
+  --endpoint https://search.example.com \
+  --scope user
 
-camofox-web-search install codex --endpoint https://search.example.com --scope user
-camofox-web-search doctor codex --endpoint https://search.example.com --scope user
+# 使用受管 Gateway 时，还需把 WEB_SEARCH_API_KEY 持久化到 ~/.openclaw/.env。
+openclaw gateway restart
+camofox-web-search doctor openclaw \
+  --endpoint https://search.example.com \
+  --scope user --live
+openclaw tui
 ```
 
-可以把 `codex` 替换为 `claude`、`opencode`、`pi`、`openclaw` 或 `hermes`。安装器只保存 endpoint 和环境变量引用，不会保存 Token。OpenClaw 与 HermesAgent 原生插件只支持 user scope。使用 `--dry-run` 预览改动，使用 `--force` 替换冲突的受管配置，使用 `doctor --live` 执行真实搜索验证。
+安装器使用 OpenClaw 环境变量 SecretRef，不会把 Token 写入 `openclaw.json`。通过 systemd 或 launchd 管理的 Gateway 必须能从 `~/.openclaw/.env` 或 Service Environment 读取 Key；只在交互式 Shell 中执行 `export` 无法持久生效。
 
-Pi 安装流程还会执行 `pi install npm:camofox-web-search-pi`，注册调用 REST gateway 的原生工具。
+完整步骤请查看 [OpenClaw 安装、使用、代理、验证与卸载指南](https://idefav.github.io/web-search/zh-CN/openclaw/)。[OpenClaw 示例](./examples/openclaw)还提供等价的手工配置。
 
-OpenClaw 会安装 `camofox-web-search-openclaw` 并注册原生 `web_search`/`web_fetch`；HermesAgent 会把 `camofox-web-search-hermes` 安装到自身 Python 环境并注册 `web_search`/`web_extract`，非标准环境可传入 `--hermes-python`。
+## HermesAgent 安装与使用
+
+受管安装器能够发现 Hermes 启动脚本、当前 `venv` 与旧版 `.venv` 目录，以及 Hermes 自带的 `uv`：
+
+```bash
+export WEB_SEARCH_API_KEY="<通过安全方式从服务端 .env 复制>"
+camofox-web-search install hermes \
+  --endpoint https://search.example.com \
+  --scope user
+
+# 还需把 WEB_SEARCH_API_KEY 持久化到 ~/.hermes/.env。
+camofox-web-search doctor hermes \
+  --endpoint https://search.example.com \
+  --scope user --live
+hermes -t web chat --tui
+```
+
+Doctor 会执行 Hermes 的真实插件发现流程，因此 `PASS hermes-provider` 能证明 `camofox` 已完成注册，而不只是出现在插件列表里。自定义安装可设置 `HERMES_PYTHON` 或传入 `--hermes-python`。
+
+完整步骤请查看 [HermesAgent 安装、使用、Python/uv 排障、验证与卸载指南](https://idefav.github.io/web-search/zh-CN/hermes/)。[HermesAgent 示例](./examples/hermes)包含 PyPI 手工接入方式。
 
 ## API
 

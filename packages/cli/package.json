@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Install and diagnose camofox-web-search for Codex, Claude Code, OpenCode, Pi, OpenClaw, and HermesAgent",
   "license": "MIT",
   "repository": {

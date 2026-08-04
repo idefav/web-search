@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search-openclaw",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Native OpenClaw web_search and web_fetch providers for Camofox Web Search",
   "license": "MIT",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "git+https://github.com/idefav/web-search.git",
     "directory": "plugins/openclaw"
   },
-  "homepage": "https://github.com/idefav/web-search#readme",
+  "homepage": "https://idefav.github.io/web-search/en/openclaw/",
   "bugs": {
     "url": "https://github.com/idefav/web-search/issues"
   },

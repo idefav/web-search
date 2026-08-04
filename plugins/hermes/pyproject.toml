@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "camofox-web-search-hermes"
-version = "0.0.4"
+version = "0.0.5"
 description = "Native HermesAgent web_search and web_extract provider for Camofox Web Search"
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
@@ -19,15 +19,14 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/idefav/web-search"
-Documentation = "https://idefav.github.io/web-search/en/examples/"
+Documentation = "https://idefav.github.io/web-search/en/hermes/"
 Issues = "https://github.com/idefav/web-search/issues"
 
 [project.entry-points."hermes_agent.plugins"]
-camofox-web-search = "camofox_web_search_hermes:register"
+camofox-web-search = "camofox_web_search_hermes"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/camofox_web_search_hermes"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-

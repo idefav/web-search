@@ -64,7 +64,7 @@ openclaw gateway restart
 openclaw plugins inspect camofox --runtime --json
 ```
 
-See the [complete OpenClaw example](https://github.com/idefav/web-search/tree/main/examples/openclaw) for manual JSON5 configuration and local package development.
+Read the dedicated [OpenClaw installation and usage guide](/en/openclaw/). The [complete OpenClaw example](https://github.com/idefav/web-search/tree/main/examples/openclaw) covers manual JSON5 configuration and local package development.
 
 ### HermesAgent native provider
 
@@ -76,7 +76,7 @@ camofox-web-search install hermes --endpoint https://search.example.com --scope 
 camofox-web-search doctor hermes --endpoint https://search.example.com --scope user --live
 ```
 
-See the [complete HermesAgent example](https://github.com/idefav/web-search/tree/main/examples/hermes) for manual PyPI and backend configuration.
+Read the dedicated [HermesAgent installation and usage guide](/en/hermes/). The [complete HermesAgent example](https://github.com/idefav/web-search/tree/main/examples/hermes) covers manual PyPI and backend configuration.
 
 ## Direct API calls
 

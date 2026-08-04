@@ -17,6 +17,8 @@ camofox-web-search doctor openclaw \
 
 The installer writes an environment SecretRef, not the token. OpenClaw native plugins are user-scoped.
 
+When the Gateway runs as a managed service, persist the key in `~/.openclaw/.env` with mode `0600`; an `export` in the current shell is not inherited by systemd or launchd. The complete [OpenClaw guide](https://idefav.github.io/web-search/en/openclaw/) covers verification, usage, proxy exclusions, and removal.
+
 ## Manual install
 
 ```bash
@@ -35,4 +37,4 @@ openclaw plugins inspect camofox --runtime --json
 
 The relevant source-shaped config is shown in [`openclaw.json5`](./openclaw.json5).
 
-Try: `Search for the latest Camofox Browser documentation, fetch the primary source, and cite it.`
+Start `openclaw tui`, then try: `Search for the latest Camofox Browser documentation, fetch the primary source, and cite it.`

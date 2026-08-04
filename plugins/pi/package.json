@@ -1,6 +1,6 @@
 {
   "name": "camofox-web-search-pi",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Native Pi extension for camofox-web-search",
   "license": "MIT",
   "repository": {
@@ -31,7 +31,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "camofox-web-search-client": "0.0.4",
+    "camofox-web-search-client": "0.0.5",
     "@sinclair/typebox": "0.34.41"
   },
   "pi": {

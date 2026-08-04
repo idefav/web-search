@@ -12,7 +12,7 @@ async function filesBelow(path) {
 }
 
 const htmlFiles = (await filesBelow(site)).filter((path) => path.endsWith(".html"));
-if (htmlFiles.length !== 10) throw new Error(`Expected 10 generated HTML pages, found ${htmlFiles.length}`);
+if (htmlFiles.length !== 14) throw new Error(`Expected 14 generated HTML pages, found ${htmlFiles.length}`);
 
 for (const path of htmlFiles) {
   const html = await readFile(path, "utf8");
@@ -41,7 +41,11 @@ for (const required of [
   "examples/openclaw/README.md",
   "examples/openclaw/openclaw.json5",
   "examples/hermes/README.md",
-  "examples/hermes/config.yaml"
+  "examples/hermes/config.yaml",
+  "docs/content/en/openclaw.md",
+  "docs/content/en/hermes.md",
+  "docs/content/zh-CN/openclaw.md",
+  "docs/content/zh-CN/hermes.md"
 ]) await access(join(root, required));
 
 process.stdout.write(`Validated ${htmlFiles.length} generated documentation pages and example links\n`);

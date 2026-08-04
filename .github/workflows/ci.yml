@@ -71,9 +71,15 @@ jobs:
       - run: uv build plugins/hermes
       - run: uvx twine check plugins/hermes/dist/*
       - run: uv venv /tmp/hermes-test
-      - run: uv pip install --python /tmp/hermes-test/bin/python hermes-agent==0.19.0 pytest plugins/hermes
+      - name: Install HermesAgent 0.20 host and plugin
+        run: |
+          git init /tmp/hermes-agent
+          git -C /tmp/hermes-agent remote add origin https://github.com/NousResearch/hermes-agent.git
+          git -C /tmp/hermes-agent fetch --depth=1 origin 3c27eb6234bf91b8ceee9e9071591b31e9b148cb
+          git -C /tmp/hermes-agent checkout --detach FETCH_HEAD
+          uv pip install --python /tmp/hermes-test/bin/python -e /tmp/hermes-agent pytest plugins/hermes
       - run: /tmp/hermes-test/bin/python -m pytest plugins/hermes/tests
-      - run: /tmp/hermes-test/bin/python -c "from importlib.metadata import entry_points; ep=[e for e in entry_points(group='hermes_agent.plugins') if e.name == 'camofox-web-search']; assert len(ep) == 1; assert callable(ep[0].load())"
+      - run: /tmp/hermes-test/bin/python -c "from importlib.metadata import entry_points; ep=[e for e in entry_points(group='hermes_agent.plugins') if e.name == 'camofox-web-search']; assert len(ep) == 1; plugin=ep[0].load(); assert callable(plugin.register)"
       - name: Verify native provider activation
         env:
           HERMES_HOME: /tmp/hermes-home
@@ -83,7 +89,7 @@ jobs:
           /tmp/hermes-test/bin/hermes config set WEB_SEARCH_ENDPOINT http://127.0.0.1:8080 --force
           /tmp/hermes-test/bin/hermes config set web.search_backend camofox
           /tmp/hermes-test/bin/hermes config set web.extract_backend camofox
-          /tmp/hermes-test/bin/python -c "from camofox_web_search_hermes import CamofoxWebSearchProvider as P; p=P(); assert p.is_available() and p.supports_search() and p.supports_extract()"
+          /tmp/hermes-test/bin/python -c "from hermes_cli.plugins import discover_plugins; discover_plugins(force=True); from agent.web_search_registry import get_provider; p=get_provider('camofox'); assert p and p.is_available() and p.supports_search() and p.supports_extract()"
 
   openclaw-plugin:
     runs-on: ubuntu-latest

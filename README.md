@@ -14,14 +14,97 @@ A self-hosted, remote-first Web Search service for Codex, Claude Code, OpenCode,
 - **Deployment and integration included:** version-pinned Docker Compose, multi-architecture GHCR images, typed REST client, OpenAPI contract, Agent installer, native Pi/OpenClaw/HermesAgent plugins, and runnable examples ship together.
 - **Observable and automation-friendly:** structured errors, health checks, Prometheus metrics, stateless MCP, deterministic package versions, and real Docker E2E are part of the supported path.
 
-## What's new in v0.0.4
+| Agent | Integration | Native tools |
+| --- | --- | --- |
+| Codex, Claude Code, OpenCode | Streamable HTTP MCP | `web_search`, `web_fetch` |
+| Pi | Native npm extension | `web_search`, `web_fetch` |
+| OpenClaw | Native npm provider | `web_search`, `web_fetch` |
+| HermesAgent | Native Python provider | `web_search`, `web_extract` |
+| LangChain Deep Agents and custom Agents | MCP, REST, or typed client | Application-defined |
 
-- Added a native OpenClaw npm plugin that preserves the canonical `web_search` and `web_fetch` tools.
-- Added a native HermesAgent PyPI provider for `web_search` and `web_extract`.
-- Extended the CLI with managed installation, diagnostics, conflict checks, and safe provider restoration for both Agents.
-- Added runnable examples, bilingual documentation, real host compatibility tests, Docker provider E2E, and npm/PyPI Trusted Publishing.
+## Install for your Agent
 
-Read the complete [v0.0.4 release notes](https://github.com/idefav/web-search/releases/tag/v0.0.4) or browse [all releases](https://github.com/idefav/web-search/releases).
+Deploy the [server](https://idefav.github.io/web-search/en/deployment/) first, then install the configuration CLI on the machine where your Agent runs:
+
+```bash
+npm install -g camofox-web-search
+export WEB_SEARCH_API_KEY="<copy securely from the server .env>"
+```
+
+### Codex, Claude Code, and OpenCode
+
+These Agents connect through Streamable HTTP MCP; no additional native plugin package is required:
+
+```bash
+camofox-web-search install codex --endpoint https://search.example.com --scope user
+camofox-web-search install claude --endpoint https://search.example.com --scope user
+camofox-web-search install opencode --endpoint https://search.example.com --scope user
+```
+
+Restart the selected Agent and ask it to call `web_search`. Use `doctor` with the same target to verify its configuration:
+
+```bash
+camofox-web-search doctor codex --endpoint https://search.example.com --scope user --live
+```
+
+### Pi
+
+```bash
+camofox-web-search install pi --endpoint https://search.example.com --scope user
+camofox-web-search doctor pi --endpoint https://search.example.com --scope user --live
+pi
+```
+
+The installer runs `pi install npm:camofox-web-search-pi` and configures the native REST-backed `web_search` and `web_fetch` tools.
+
+### OpenClaw
+
+```bash
+camofox-web-search install openclaw --endpoint https://search.example.com --scope user
+# Persist WEB_SEARCH_API_KEY in ~/.openclaw/.env when the Gateway runs as a service.
+openclaw gateway restart
+camofox-web-search doctor openclaw --endpoint https://search.example.com --scope user --live
+openclaw tui
+```
+
+The installer runs `openclaw plugins install npm:camofox-web-search-openclaw`, selects the native providers, and stores environment SecretRefs instead of the token. See the [complete OpenClaw guide](https://idefav.github.io/web-search/en/openclaw/).
+
+### HermesAgent
+
+```bash
+camofox-web-search install hermes --endpoint https://search.example.com --scope user
+# Persist WEB_SEARCH_API_KEY in ~/.hermes/.env.
+camofox-web-search doctor hermes --endpoint https://search.example.com --scope user --live
+hermes -t web chat --tui
+```
+
+The installer adds `camofox-web-search-hermes` to Hermes' Python environment, enables it, and selects the native search/extract backend. See the [complete HermesAgent guide](https://idefav.github.io/web-search/en/hermes/).
+
+### LangChain Deep Agents and custom Agents
+
+Custom Agents can use `/mcp`, the REST API, or `camofox-web-search-client` directly. The runnable Deep Agents example needs no native plugin:
+
+```bash
+cd examples/deepagents
+cp .env.example .env
+uv sync --locked
+uv run --env-file .env python agent.py --transport mcp --stream \
+  "Research Camofox Browser and cite primary sources"
+```
+
+See [`examples/deepagents`](./examples/deepagents) and the [manual MCP configurations](./examples/agent-configs).
+
+Codex, Claude Code, OpenCode, and Pi also support `--scope project`. OpenClaw and HermesAgent plugins are user-scoped. Add `--dry-run` to preview changes or `--force` to intentionally replace a conflicting managed entry.
+
+## What's new in v0.0.5
+
+- Fixed HermesAgent 0.20 plugin discovery by exporting a module entry point compatible with the current loader.
+- Made the CLI detect the official Hermes shell launcher, both `venv` and `.venv` layouts, and Hermes' bundled `uv` without requiring `pip`.
+- Upgraded `doctor hermes` to verify real runtime provider registration instead of only importing the package.
+- Hardened `doctor openclaw` so a plugin load failure cannot pass based on declared provider IDs alone.
+- Added complete OpenClaw and HermesAgent guides plus quick installation commands for every supported Agent on the README and GitHub Pages home page.
+
+Read the complete [v0.0.5 release notes](https://github.com/idefav/web-search/releases/tag/v0.0.5) or browse [all releases](https://github.com/idefav/web-search/releases).
 
 ## Architecture
 
@@ -44,7 +127,7 @@ Only the two high-level, read-only tools are exposed. Browser clicking, typing, 
 The supported production path is Docker Compose on a 64-bit Linux host with Docker Engine, Compose v2, Git, and OpenSSL. Use the same version for the source tag and GHCR image:
 
 ```bash
-VERSION="0.0.4"
+VERSION="0.0.5"
 git clone --branch "v${VERSION}" --depth 1 https://github.com/idefav/web-search.git
 cd web-search
 WEB_SEARCH_IMAGE="ghcr.io/idefav/web-search:${VERSION}" ./deploy/bootstrap.sh
@@ -66,21 +149,52 @@ Search uses the stable-first provider chain `duckduckgo,brave,bing,google` by de
 
 `web_fetch` performs one bounded readiness wait when a page initially exposes only an empty or iframe placeholder. This covers WeChat Official Account links that briefly pass through an automatic verification interstitial. A verification page that does not clear is returned as retryable `fetch_blocked`; the service never attempts to solve CAPTCHA.
 
-## Connect an Agent
+## Installer behavior
+
+The installer stores only the endpoint and an environment-variable reference, never the token. It preserves unrelated settings, creates backups for edited Agent configuration files, and supports idempotent reruns. Manual configurations for Codex, Claude Code, OpenCode, and Pi are available in [`examples/agent-configs`](./examples/agent-configs).
+
+## OpenClaw installation and usage
+
+OpenClaw 2026.7.1+ can use the native provider without changing its standard tool names:
 
 ```bash
-npm install -g camofox-web-search
 export WEB_SEARCH_API_KEY="<copy securely from the server .env>"
+camofox-web-search install openclaw \
+  --endpoint https://search.example.com \
+  --scope user
 
-camofox-web-search install codex --endpoint https://search.example.com --scope user
-camofox-web-search doctor codex --endpoint https://search.example.com --scope user
+# Also persist WEB_SEARCH_API_KEY in ~/.openclaw/.env for a managed Gateway.
+openclaw gateway restart
+camofox-web-search doctor openclaw \
+  --endpoint https://search.example.com \
+  --scope user --live
+openclaw tui
 ```
 
-Replace `codex` with `claude`, `opencode`, `pi`, `openclaw`, or `hermes` as needed. The installer stores only the endpoint and an environment-variable reference, never the token. OpenClaw and HermesAgent native plugins are user-scoped. Use `--dry-run` to inspect changes, `--force` to replace a conflicting managed entry, and `doctor --live` to include a real search.
+The installer uses OpenClaw environment SecretRefs and does not write the token into `openclaw.json`. A Gateway managed by systemd or launchd must be able to read the key from `~/.openclaw/.env` or its service environment; an interactive-shell `export` alone is not persistent.
 
-For Pi, installation also runs `pi install npm:camofox-web-search-pi` and configures the native REST-backed tools.
+Read the complete [OpenClaw installation, usage, proxy, verification, and uninstall guide](https://idefav.github.io/web-search/en/openclaw/). The [OpenClaw example](./examples/openclaw) also includes equivalent manual configuration.
 
-OpenClaw installs `camofox-web-search-openclaw` and registers native `web_search`/`web_fetch` providers. HermesAgent installs `camofox-web-search-hermes` into its Python environment and registers native `web_search`/`web_extract`; pass `--hermes-python` for a non-standard environment.
+## HermesAgent installation and usage
+
+The managed installer discovers the Hermes launcher, both current `venv` and legacy `.venv` layouts, and Hermes' bundled `uv`:
+
+```bash
+export WEB_SEARCH_API_KEY="<copy securely from the server .env>"
+camofox-web-search install hermes \
+  --endpoint https://search.example.com \
+  --scope user
+
+# Also persist WEB_SEARCH_API_KEY in ~/.hermes/.env.
+camofox-web-search doctor hermes \
+  --endpoint https://search.example.com \
+  --scope user --live
+hermes -t web chat --tui
+```
+
+The doctor performs Hermes' actual plugin discovery, so `PASS hermes-provider` proves that `camofox` was registered—not merely that the package appears in the plugin list. Set `HERMES_PYTHON` or pass `--hermes-python` for a custom installation.
+
+Read the complete [HermesAgent installation, usage, Python/uv troubleshooting, verification, and uninstall guide](https://idefav.github.io/web-search/en/hermes/). The [HermesAgent example](./examples/hermes) includes the manual PyPI path.
 
 ## API
 

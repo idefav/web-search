@@ -2,6 +2,16 @@
 
 Release tags pin the source, npm packages, and GHCR image to the same version. Production deployments should never mix versions.
 
+## v0.0.5 — Reliable OpenClaw and HermesAgent setup
+
+- Fixes the HermesAgent entry point for the current plugin loader and validates real runtime provider registration in `doctor hermes`.
+- Detects the official Hermes shell wrapper, both `venv` and `.venv` layouts, and the bundled `~/.hermes/bin/uv` without requiring `pip`.
+- Makes `doctor openclaw` require a loaded plugin, preventing declared provider IDs from masking runtime dependency failures.
+- Adds dedicated bilingual OpenClaw and HermesAgent installation, usage, proxy, secret-persistence, diagnostics, and removal guides.
+- Adds copy-ready installation and startup commands for Codex, Claude Code, OpenCode, Pi, OpenClaw, HermesAgent, and LangChain Deep Agents to both project home pages.
+
+[GitHub Release v0.0.5](https://github.com/idefav/web-search/releases/tag/v0.0.5) · [Compare v0.0.4...v0.0.5](https://github.com/idefav/web-search/compare/v0.0.4...v0.0.5)
+
 ## v0.0.4 — Native OpenClaw and HermesAgent providers
 
 - Adds `camofox-web-search-openclaw` with canonical native `web_search` and `web_fetch` providers.

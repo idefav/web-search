@@ -11,4 +11,6 @@ openclaw config set tools.web.fetch.provider camofox
 openclaw gateway restart
 ```
 
-Use `camofox-web-search install openclaw --endpoint ...` for a managed installation that stores only an environment SecretRef, never the token value.
+Use `camofox-web-search install openclaw --endpoint ...` for a managed installation that stores only an environment SecretRef, never the token value. Persist the key in `~/.openclaw/.env` when the Gateway runs as a service.
+
+See the full [OpenClaw installation and usage guide](https://idefav.github.io/web-search/en/openclaw/).

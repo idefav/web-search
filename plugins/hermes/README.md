@@ -11,4 +11,6 @@ hermes config set web.extract_backend camofox
 export WEB_SEARCH_API_KEY="..."
 ```
 
-The package intentionally does not depend on `hermes-agent`, so installing it cannot replace the user's HermesAgent version.
+The package intentionally does not depend on `hermes-agent`, so installing it cannot replace the user's HermesAgent version. Persist the key in `~/.hermes/.env` for normal Hermes sessions.
+
+See the full [HermesAgent installation and usage guide](https://idefav.github.io/web-search/en/hermes/).

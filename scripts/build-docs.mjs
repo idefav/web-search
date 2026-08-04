@@ -17,6 +17,8 @@ const languages = {
     alternateCode: "zh-CN",
     project: "Overview",
     deployment: "Server deployment",
+    openclaw: "OpenClaw",
+    hermes: "HermesAgent",
     examples: "Examples",
     releases: "Releases",
     article: "Article"
@@ -27,6 +29,8 @@ const languages = {
     alternateCode: "en",
     project: "项目概览",
     deployment: "服务端部署",
+    openclaw: "OpenClaw 接入",
+    hermes: "HermesAgent 接入",
     examples: "示例",
     releases: "版本记录",
     article: "深度文章"
@@ -36,6 +40,8 @@ const languages = {
 const pages = [
   { slug: "", file: "index.md", label: "project", title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
   { slug: "deployment", file: "deployment.md", label: "deployment", title: { en: "Server deployment", "zh-CN": "服务端部署" } },
+  { slug: "openclaw", file: "openclaw.md", label: "openclaw", title: { en: "OpenClaw installation and usage", "zh-CN": "OpenClaw 安装与使用" } },
+  { slug: "hermes", file: "hermes.md", label: "hermes", title: { en: "HermesAgent installation and usage", "zh-CN": "HermesAgent 安装与使用" } },
   { slug: "examples", file: "examples.md", label: "examples", title: { en: "Examples", "zh-CN": "示例" } },
   { slug: "releases", file: "releases.md", label: "releases", title: { en: "Release notes", "zh-CN": "版本记录" } },
   {

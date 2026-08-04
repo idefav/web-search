@@ -64,7 +64,7 @@ openclaw gateway restart
 openclaw plugins inspect camofox --runtime --json
 ```
 
-[完整 OpenClaw 示例](https://github.com/idefav/web-search/tree/main/examples/openclaw)包含手工 JSON5 配置与本地包开发方式。
+请先查看单独的 [OpenClaw 安装与使用指南](/zh-CN/openclaw/)。[完整 OpenClaw 示例](https://github.com/idefav/web-search/tree/main/examples/openclaw)包含手工 JSON5 配置与本地包开发方式。
 
 ### HermesAgent 原生 Provider
 
@@ -76,7 +76,7 @@ camofox-web-search install hermes --endpoint https://search.example.com --scope 
 camofox-web-search doctor hermes --endpoint https://search.example.com --scope user --live
 ```
 
-[完整 HermesAgent 示例](https://github.com/idefav/web-search/tree/main/examples/hermes)包含手工 PyPI 安装与 backend 配置。
+请先查看单独的 [HermesAgent 安装与使用指南](/zh-CN/hermes/)。[完整 HermesAgent 示例](https://github.com/idefav/web-search/tree/main/examples/hermes)包含手工 PyPI 安装与 backend 配置。
 
 ## 直接调用 API
 

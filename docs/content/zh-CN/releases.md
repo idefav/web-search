@@ -2,6 +2,16 @@
 
 Release tag 会把源码、npm 包和 GHCR 镜像固定为同一个版本。生产部署不应混用不同版本。
 
+## v0.0.5 — OpenClaw 与 HermesAgent 可靠接入
+
+- 修复 HermesAgent 当前插件加载器所需的 entry point，并让 `doctor hermes` 验证真实运行时 Provider 注册。
+- 支持发现官方 Hermes Shell Wrapper、`venv`/`.venv` 目录与内置 `~/.hermes/bin/uv`，无需依赖 `pip`。
+- `doctor openclaw` 现在要求插件处于已加载状态，避免运行时依赖失败被声明的 Provider ID 掩盖。
+- 增加 OpenClaw 与 HermesAgent 中英文独立指南，覆盖安装、使用、代理、Secret 持久化、诊断与卸载。
+- 在项目中英文首页增加 Codex、Claude Code、OpenCode、Pi、OpenClaw、HermesAgent 与 LangChain Deep Agents 的可复制安装和启动命令。
+
+[GitHub Release v0.0.5](https://github.com/idefav/web-search/releases/tag/v0.0.5) · [比较 v0.0.4...v0.0.5](https://github.com/idefav/web-search/compare/v0.0.4...v0.0.5)
+
 ## v0.0.4 — OpenClaw 与 HermesAgent 原生 Provider
 
 - 增加 `camofox-web-search-openclaw`，提供标准原生 `web_search` 和 `web_fetch`。
