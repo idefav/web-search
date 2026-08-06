@@ -193,7 +193,7 @@ const rootPage = `<!doctype html>
 <link rel="stylesheet" href="styles.css"></head><body class="language-home">
 <main><section class="hero"><p class="eyebrow">SELF-HOSTED · MCP + REST</p><h1>Camofox Web Search</h1>
 <p class="lede">Choose a documentation language / 选择文档语言</p>
-<div class="language-choices"><a href="zh-CN/" data-language="zh-CN">简体中文</a><a href="en/" data-language="en">English</a></div>
+<div class="language-choices"><a href="zh-CN/" data-language="zh-CN">简体中文</a><a href="en/" data-language="en">English</a><a href="https://github.com/idefav/web-search">GitHub Repository ↗</a></div>
 </section></main><script src="app.js"></script></body></html>`;
 await writeFile(join(output, "index.html"), rootPage);
 await cp(join(source, "styles.css"), join(output, "styles.css"));

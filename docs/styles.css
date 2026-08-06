@@ -26,6 +26,9 @@ nav { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; }
 nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
 nav a:hover, nav a[aria-current="page"] { color: var(--accent); }
 nav .language-link { color: var(--accent-2); }
+.repo-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--text); }
+.repo-link:hover { border-color: var(--accent); text-decoration: none; }
+.repo-link svg { width: 16px; height: 16px; }
 .nav-group { position: relative; color: var(--muted); font-size: 14px; }
 .nav-group summary { display: flex; align-items: center; gap: 5px; list-style: none; cursor: pointer; user-select: none; }
 .nav-group summary::-webkit-details-marker { display: none; }
@@ -89,7 +92,9 @@ article code { color: var(--accent-2); overflow-wrap: anywhere; }
 .article-card .article-link { margin: auto 20px 0; }
 .breadcrumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 38px; color: var(--muted); font-size: 13px; }
 .breadcrumbs a { text-decoration: none; }
-footer { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 56px; color: #728479; font: 12px ui-monospace, monospace; }
+footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 56px; color: #728479; font: 12px ui-monospace, monospace; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--accent); }
 .language-home main { min-height: 100vh; }
 .language-choices { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 .language-choices a { min-width: 150px; padding: 14px 20px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-align: center; text-decoration: none; background: var(--panel); }
@@ -98,6 +103,7 @@ footer { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 
   main { width: min(100% - 24px, 1080px); }
   .site-header { position: static; align-items: flex-start; flex-direction: column; padding: 16px 12px; }
   .site-header nav { align-items: flex-start; flex-direction: column; width: 100%; gap: 12px; }
+  .site-header .repo-link { width: auto; }
   .nav-group { width: 100%; }
   .nav-group summary { width: 100%; }
   .nav-menu { position: static; min-width: 0; margin-top: 8px; padding: 4px 0 0 12px; border: 0; background: transparent; box-shadow: none; }
@@ -108,6 +114,7 @@ footer { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 
   .hero { min-height: auto; padding: 72px 0; }
   .fields, .agent-grid, .release-grid, .article-grid { grid-template-columns: 1fr; }
   .article-card:first-child { grid-column: auto; }
+  footer { align-items: flex-start; flex-direction: column; }
   section { padding: 56px 0; }
 }
 

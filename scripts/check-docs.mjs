@@ -36,6 +36,18 @@ for (const path of htmlFiles) {
 }
 
 for (const required of [
+  "index.html",
+  "en/index.html",
+  "zh-CN/index.html",
+  "zh-CN/articles/index.html"
+]) {
+  const html = await readFile(join(site, required), "utf8");
+  if (!html.includes('href="https://github.com/idefav/web-search"')) {
+    throw new Error(`Missing GitHub repository link in ${required}`);
+  }
+}
+
+for (const required of [
   "examples/deepagents/README.md",
   "examples/deepagents/agent.py",
   "examples/deepagents/demo.cast",
