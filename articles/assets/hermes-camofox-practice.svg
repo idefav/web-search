@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080" role="img" aria-labelledby="title desc">
+  <title id="title">HermesAgent 集成五层验收路径</title>
+  <desc id="desc">从网关就绪、插件发现、Provider 注册、真实搜索到带引用回答的五层验收</desc>
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0l12 6-12 6z" fill="#6d28d9"/></marker></defs>
+  <rect width="1200" height="1080" rx="36" fill="#fbfaff"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="64" y="82" font-size="46" font-weight="820" fill="#2e1065">不要止步于“插件已启用”：用五层证据完成验收</text>
+    <text x="64" y="132" font-size="26" fill="#6b7280">插件列表只是声明，真实 Provider 发现与调用才是运行时证据</text>
+    <g transform="translate(92 208)">
+      <circle cx="52" cy="52" r="52" fill="#ede9fe"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#7c3aed">1</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#8b5cf6" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#4c1d95">Gateway 就绪</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="19" fill="#4b5563">curl --fail https://search.example.com/readyz</text>
+    </g>
+    <path d="M144 320v42" stroke="#6d28d9" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 382)">
+      <circle cx="52" cy="52" r="52" fill="#fef3c7"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#d97706">2</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#f59e0b" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#92400e">插件可发现</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18" fill="#4b5563">hermes plugins list --plain --no-bundled</text>
+    </g>
+    <path d="M144 494v42" stroke="#6d28d9" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 556)">
+      <circle cx="52" cy="52" r="52" fill="#dcfce7"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#16a34a">3</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#22c55e" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#14532d">Provider 已注册</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18" fill="#4b5563">doctor hermes → PASS hermes-provider</text>
+    </g>
+    <path d="M144 668v42" stroke="#6d28d9" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 730)">
+      <circle cx="52" cy="52" r="52" fill="#dbeafe"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#2563eb">4</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#3b82f6" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#1e40af">真实搜索成功</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17" fill="#4b5563">camofox-web-search doctor hermes ... --live</text>
+    </g>
+    <path d="M144 842v42" stroke="#6d28d9" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 904)">
+      <circle cx="52" cy="52" r="52" fill="#fae8ff"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#a21caf">5</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#d946ef" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#86198f">Agent 给出可核验引用</text>
+      <text x="174" y="78" font-size="20" fill="#4b5563">搜索 → 提取主要来源 → 比较 → 输出链接</text>
+    </g>
+  </g>
+</svg>

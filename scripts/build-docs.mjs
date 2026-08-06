@@ -18,7 +18,9 @@ const languages = {
     project: "Overview",
     deployment: "Server deployment",
     openclaw: "OpenClaw",
+    openclawTutorial: "OpenClaw tutorial",
     hermes: "HermesAgent",
+    hermesTutorial: "HermesAgent tutorial",
     examples: "Examples",
     releases: "Releases",
     article: "Article"
@@ -30,7 +32,9 @@ const languages = {
     project: "项目概览",
     deployment: "服务端部署",
     openclaw: "OpenClaw 接入",
+    openclawTutorial: "OpenClaw 实战",
     hermes: "HermesAgent 接入",
+    hermesTutorial: "HermesAgent 实战",
     examples: "示例",
     releases: "版本记录",
     article: "深度文章"
@@ -41,7 +45,21 @@ const pages = [
   { slug: "", file: "index.md", label: "project", title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
   { slug: "deployment", file: "deployment.md", label: "deployment", title: { en: "Server deployment", "zh-CN": "服务端部署" } },
   { slug: "openclaw", file: "openclaw.md", label: "openclaw", title: { en: "OpenClaw installation and usage", "zh-CN": "OpenClaw 安装与使用" } },
+  {
+    slug: "openclaw-tutorial",
+    source: join(root, "articles", "openclaw-camofox-web-search-guide.md"),
+    label: "openclawTutorial",
+    languages: ["zh-CN"],
+    title: { "zh-CN": "给 OpenClaw 装上真正可控的 Web Search" }
+  },
   { slug: "hermes", file: "hermes.md", label: "hermes", title: { en: "HermesAgent installation and usage", "zh-CN": "HermesAgent 安装与使用" } },
+  {
+    slug: "hermesagent-tutorial",
+    source: join(root, "articles", "hermesagent-camofox-web-search-guide.md"),
+    label: "hermesTutorial",
+    languages: ["zh-CN"],
+    title: { "zh-CN": "让 HermesAgent 拥有真正可控的 Web Search" }
+  },
   { slug: "examples", file: "examples.md", label: "examples", title: { en: "Examples", "zh-CN": "示例" } },
   { slug: "releases", file: "releases.md", label: "releases", title: { en: "Release notes", "zh-CN": "版本记录" } },
   {

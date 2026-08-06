@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "articles/**"
       - "docs/**"
       - "examples/**"
       - "scripts/build-docs.mjs"

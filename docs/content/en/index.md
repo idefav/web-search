@@ -120,8 +120,8 @@ See the [examples](/en/examples/) for manual Agent configuration and a custom La
 ## Native Agent guides
 
 <div class="release-grid">
-<article><h3>OpenClaw</h3><p>Install the native npm provider, persist the Gateway SecretRef, verify runtime registration, handle proxy exclusions, and start using web_search/web_fetch.</p><p><a href="/en/openclaw/">OpenClaw installation and usage →</a></p></article>
-<article><h3>HermesAgent</h3><p>Install into the correct Hermes Python environment, use bundled uv, verify real plugin discovery, and start the TUI with the web toolset.</p><p><a href="/en/hermes/">HermesAgent installation and usage →</a></p></article>
+<article><h3>OpenClaw</h3><p>Install the native npm provider, persist the Gateway SecretRef, verify runtime registration, handle proxy exclusions, and start using web_search/web_fetch.</p><p><a href="/en/openclaw/">Installation guide →</a> · <a href="/zh-CN/openclaw-tutorial/">Visual tutorial (中文) →</a></p></article>
+<article><h3>HermesAgent</h3><p>Install into the correct Hermes Python environment, use bundled uv, verify real plugin discovery, and start the TUI with the web toolset.</p><p><a href="/en/hermes/">Installation guide →</a> · <a href="/zh-CN/hermesagent-tutorial/">Visual tutorial (中文) →</a></p></article>
 </div>
 
 ## Security boundary

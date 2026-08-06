@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080" role="img" aria-labelledby="title desc">
+  <title id="title">OpenClaw 集成验收路径</title>
+  <desc id="desc">从服务健康、配置有效、插件加载、真实搜索到带引用回答的五层验收</desc>
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0l12 6-12 6z" fill="#0f766e"/></marker></defs>
+  <rect width="1200" height="1080" rx="36" fill="#f8fcff"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="64" y="82" font-size="48" font-weight="820" fill="#102a43">不要止步于“装上了”：用五层证据完成验收</text>
+    <text x="64" y="132" font-size="26" fill="#627d98">每一层回答一个不同问题，全部通过才算真正可用</text>
+    <g transform="translate(92 208)">
+      <circle cx="52" cy="52" r="52" fill="#e0f2fe"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#0284c7">1</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#38bdf8" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#0c4a6e">Gateway 就绪</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="19" fill="#486581">curl --fail https://search.example.com/readyz</text>
+    </g>
+    <path d="M144 320v42" stroke="#0f766e" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 382)">
+      <circle cx="52" cy="52" r="52" fill="#dcfce7"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#16a34a">2</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#22c55e" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#14532d">配置有效</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="19" fill="#486581">openclaw config validate</text>
+    </g>
+    <path d="M144 494v42" stroke="#0f766e" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 556)">
+      <circle cx="52" cy="52" r="52" fill="#ccfbf1"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#0f766e">3</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#14b8a6" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#115e59">运行时已注册</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18" fill="#486581">openclaw plugins inspect camofox --runtime --json</text>
+    </g>
+    <path d="M144 668v42" stroke="#0f766e" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 730)">
+      <circle cx="52" cy="52" r="52" fill="#e0e7ff"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#4f46e5">4</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#6366f1" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#3730a3">真实搜索成功</text>
+      <text x="174" y="78" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="17" fill="#486581">camofox-web-search doctor openclaw ... --live</text>
+    </g>
+    <path d="M144 842v42" stroke="#0f766e" stroke-width="6" marker-end="url(#arrow)"/>
+    <g transform="translate(92 904)">
+      <circle cx="52" cy="52" r="52" fill="#fef3c7"/><text x="52" y="67" text-anchor="middle" font-size="40" font-weight="800" fill="#b45309">5</text>
+      <rect x="132" width="880" height="104" rx="24" fill="#ffffff" stroke="#f59e0b" stroke-width="4"/>
+      <text x="174" y="45" font-size="27" font-weight="760" fill="#92400e">Agent 给出可核验引用</text>
+      <text x="174" y="78" font-size="20" fill="#486581">搜索 → 抓取主要来源 → 比较 → 输出链接</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">让 HermesAgent 拥有可控的 Web Search</title>
+  <desc id="desc">HermesAgent 集成 Camofox Web Search 原生 Provider 教程封面</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17112d"/>
+      <stop offset=".55" stop-color="#32205f"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fbbf24" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#090414" flood-opacity=".5"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <circle cx="1260" cy="170" r="420" fill="url(#glow)"/>
+  <circle cx="160" cy="820" r="340" fill="url(#glow)" opacity=".25"/>
+  <g opacity=".15" stroke="#ddd6fe" stroke-width="2">
+    <path d="M0 120H1600M0 240H1600M0 360H1600M0 480H1600M0 600H1600M0 720H1600"/>
+    <path d="M160 0V900M320 0V900M480 0V900M640 0V900M800 0V900M960 0V900M1120 0V900M1280 0V900M1440 0V900"/>
+  </g>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <rect x="92" y="104" width="286" height="50" rx="25" fill="#7c3aed" stroke="#c4b5fd" stroke-opacity=".5"/>
+    <text x="235" y="138" text-anchor="middle" font-size="23" font-weight="750" fill="#faf5ff">实践教程 · HERMESAGENT</text>
+    <text x="92" y="260" font-size="70" font-weight="850" fill="#faf5ff">让 HermesAgent 拥有</text>
+    <text x="92" y="356" font-size="78" font-weight="850" fill="#fbbf24">真正可控的 Web Search</text>
+    <text x="96" y="430" font-size="30" fill="#ddd6fe">原生 web_search / web_extract · Python 插件 · 自托管 · 可验证</text>
+    <rect x="94" y="508" width="680" height="206" rx="28" fill="#ffffff" fill-opacity=".08" stroke="#c4b5fd" stroke-opacity=".6"/>
+    <text x="132" y="568" font-size="25" font-weight="700" fill="#fef3c7">从零完成四件事</text>
+    <text x="132" y="620" font-size="24" fill="#ede9fe">① 部署 Gateway　② 安装原生 Provider</text>
+    <text x="132" y="668" font-size="24" fill="#ede9fe">③ 做一次真实检索与提取　④ 五层验收</text>
+    <text x="94" y="810" font-size="25" font-weight="650" fill="#fcd34d">Camofox Web Search</text>
+  </g>
+  <g transform="translate(1030 198)" filter="url(#shadow)" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif">
+    <rect width="410" height="490" rx="48" fill="#fafafa"/>
+    <rect x="44" y="50" width="322" height="76" rx="22" fill="#ede9fe"/>
+    <circle cx="87" cy="88" r="18" fill="#7c3aed"/>
+    <text x="122" y="98" font-size="25" font-weight="750" fill="#4c1d95">HermesAgent</text>
+    <path d="M205 150v46" stroke="#6d28d9" stroke-width="8" stroke-linecap="round"/>
+    <path d="M187 180l18 18 18-18" fill="none" stroke="#6d28d9" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="44" y="216" width="322" height="112" rx="22" fill="#fef3c7"/>
+    <text x="76" y="262" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="22" font-weight="700" fill="#92400e">web_search</text>
+    <text x="76" y="302" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="22" font-weight="700" fill="#92400e">web_extract</text>
+    <path d="M205 347v42" stroke="#6d28d9" stroke-width="8" stroke-linecap="round"/>
+    <path d="M187 373l18 18 18-18" fill="none" stroke="#6d28d9" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="44" y="406" width="322" height="48" rx="24" fill="#6d28d9"/>
+    <text x="205" y="438" text-anchor="middle" font-size="20" font-weight="750" fill="#faf5ff">Camofox Gateway</text>
+  </g>
+</svg>

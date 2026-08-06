@@ -173,7 +173,7 @@ openclaw tui
 
 安装器使用 OpenClaw 环境变量 SecretRef，不会把 Token 写入 `openclaw.json`。通过 systemd 或 launchd 管理的 Gateway 必须能从 `~/.openclaw/.env` 或 Service Environment 读取 Key；只在交互式 Shell 中执行 `export` 无法持久生效。
 
-完整步骤请查看 [OpenClaw 安装、使用、代理、验证与卸载指南](https://idefav.github.io/web-search/zh-CN/openclaw/)。[OpenClaw 示例](./examples/openclaw)还提供等价的手工配置。
+完整步骤请查看 [OpenClaw 安装、使用、代理、验证与卸载指南](https://idefav.github.io/web-search/zh-CN/openclaw/)。想从部署到真实检索完整走一遍，可阅读[图文实战教程：给 OpenClaw 装上真正可控的 Web Search](https://idefav.github.io/web-search/zh-CN/openclaw-tutorial/)。[OpenClaw 示例](./examples/openclaw)还提供等价的手工配置。
 
 ## HermesAgent 安装与使用
 
@@ -194,7 +194,7 @@ hermes -t web chat --tui
 
 Doctor 会执行 Hermes 的真实插件发现流程，因此 `PASS hermes-provider` 能证明 `camofox` 已完成注册，而不只是出现在插件列表里。自定义安装可设置 `HERMES_PYTHON` 或传入 `--hermes-python`。
 
-完整步骤请查看 [HermesAgent 安装、使用、Python/uv 排障、验证与卸载指南](https://idefav.github.io/web-search/zh-CN/hermes/)。[HermesAgent 示例](./examples/hermes)包含 PyPI 手工接入方式。
+完整步骤请查看 [HermesAgent 安装、使用、Python/uv 排障、验证与卸载指南](https://idefav.github.io/web-search/zh-CN/hermes/)。想了解 Python Provider、五层验收与真实调研实践，可阅读[图文实战教程：让 HermesAgent 拥有真正可控的 Web Search](https://idefav.github.io/web-search/zh-CN/hermesagent-tutorial/)。[HermesAgent 示例](./examples/hermes)包含 PyPI 手工接入方式。
 
 ## API
 

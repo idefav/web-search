@@ -173,7 +173,7 @@ openclaw tui
 
 The installer uses OpenClaw environment SecretRefs and does not write the token into `openclaw.json`. A Gateway managed by systemd or launchd must be able to read the key from `~/.openclaw/.env` or its service environment; an interactive-shell `export` alone is not persistent.
 
-Read the complete [OpenClaw installation, usage, proxy, verification, and uninstall guide](https://idefav.github.io/web-search/en/openclaw/). The [OpenClaw example](./examples/openclaw) also includes equivalent manual configuration.
+Read the complete [OpenClaw installation, usage, proxy, verification, and uninstall guide](https://idefav.github.io/web-search/en/openclaw/). A detailed [Chinese visual tutorial](https://idefav.github.io/web-search/zh-CN/openclaw-tutorial/) walks through deployment, native-provider setup, live research, and five-layer verification. The [OpenClaw example](./examples/openclaw) also includes equivalent manual configuration.
 
 ## HermesAgent installation and usage
 
@@ -194,7 +194,7 @@ hermes -t web chat --tui
 
 The doctor performs Hermes' actual plugin discovery, so `PASS hermes-provider` proves that `camofox` was registered—not merely that the package appears in the plugin list. Set `HERMES_PYTHON` or pass `--hermes-python` for a custom installation.
 
-Read the complete [HermesAgent installation, usage, Python/uv troubleshooting, verification, and uninstall guide](https://idefav.github.io/web-search/en/hermes/). The [HermesAgent example](./examples/hermes) includes the manual PyPI path.
+Read the complete [HermesAgent installation, usage, Python/uv troubleshooting, verification, and uninstall guide](https://idefav.github.io/web-search/en/hermes/). A detailed [Chinese visual tutorial](https://idefav.github.io/web-search/zh-CN/hermesagent-tutorial/) covers Python-provider discovery, live search/extraction, and five-layer verification. The [HermesAgent example](./examples/hermes) includes the manual PyPI path.
 
 ## API
 

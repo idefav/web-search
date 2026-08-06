@@ -122,8 +122,8 @@ Codex、Claude Code、OpenCode 与 Pi 也支持 project scope；OpenClaw 与 Her
 ## 原生 Agent 接入指南
 
 <div class="release-grid">
-<article><h3>OpenClaw</h3><p>安装原生 npm Provider、持久化 Gateway SecretRef、验证运行时注册、配置代理排除，并开始使用 web_search/web_fetch。</p><p><a href="/zh-CN/openclaw/">OpenClaw 安装与使用 →</a></p></article>
-<article><h3>HermesAgent</h3><p>安装到正确的 Hermes Python 环境、使用内置 uv、验证真实插件发现，并通过 Web Toolset 启动 TUI。</p><p><a href="/zh-CN/hermes/">HermesAgent 安装与使用 →</a></p></article>
+<article><h3>OpenClaw</h3><p>安装原生 npm Provider、持久化 Gateway SecretRef、验证运行时注册、配置代理排除，并开始使用 web_search/web_fetch。</p><p><a href="/zh-CN/openclaw/">安装指南 →</a> · <a href="/zh-CN/openclaw-tutorial/">图文实战 →</a></p></article>
+<article><h3>HermesAgent</h3><p>安装到正确的 Hermes Python 环境、使用内置 uv、验证真实插件发现，并通过 Web Toolset 启动 TUI。</p><p><a href="/zh-CN/hermes/">安装指南 →</a> · <a href="/zh-CN/hermesagent-tutorial/">图文实战 →</a></p></article>
 </div>
 
 ## 安全边界

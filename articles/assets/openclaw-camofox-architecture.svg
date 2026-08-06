@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="980" viewBox="0 0 1200 980" role="img" aria-labelledby="title desc">
+  <title id="title">OpenClaw 与 Camofox Web Search 集成架构</title>
+  <desc id="desc">用户请求由 OpenClaw 的标准工具发送到 Camofox Gateway，再通过隔离浏览器访问公开互联网</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0l12 6-12 6z" fill="#0f766e"/></marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0f172a" flood-opacity=".12"/></filter>
+  </defs>
+  <rect width="1200" height="980" rx="36" fill="#f8fafc"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+    <text x="64" y="82" font-size="48" font-weight="820" fill="#102a43">OpenClaw 保持原生工具，能力由自托管网关提供</text>
+    <text x="64" y="132" font-size="26" fill="#627d98">模型不接触浏览器控制面，只获得搜索与只读抓取结果</text>
+    <g filter="url(#shadow)">
+      <rect x="70" y="228" width="250" height="246" rx="28" fill="#ffffff" stroke="#38bdf8" stroke-width="4"/>
+      <circle cx="195" cy="292" r="34" fill="#e0f2fe"/>
+      <path d="M178 295h34M195 278v34" stroke="#0284c7" stroke-width="7" stroke-linecap="round"/>
+      <text x="195" y="360" text-anchor="middle" font-size="32" font-weight="780" fill="#0c4a6e">OpenClaw</text>
+      <text x="195" y="404" text-anchor="middle" font-size="22" fill="#486581">模型 + Agent Runtime</text>
+      <text x="195" y="438" text-anchor="middle" font-size="19" fill="#829ab1">用户会话、工具策略</text>
+      <rect x="454" y="204" width="292" height="294" rx="28" fill="#ffffff" stroke="#14b8a6" stroke-width="4"/>
+      <text x="600" y="260" text-anchor="middle" font-size="28" font-weight="800" fill="#115e59">原生 Camofox Provider</text>
+      <rect x="494" y="292" width="212" height="62" rx="18" fill="#ccfbf1"/>
+      <text x="600" y="332" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="23" fill="#115e59">web_search</text>
+      <rect x="494" y="374" width="212" height="62" rx="18" fill="#ccfbf1"/>
+      <text x="600" y="414" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="23" fill="#115e59">web_fetch</text>
+      <text x="600" y="468" text-anchor="middle" font-size="18" fill="#627d98">SecretRef 读取 API Key</text>
+      <rect x="880" y="228" width="250" height="246" rx="28" fill="#ffffff" stroke="#0f766e" stroke-width="4"/>
+      <circle cx="1005" cy="292" r="34" fill="#ccfbf1"/>
+      <path d="M984 304h42M990 304v-25h30v25" fill="none" stroke="#0f766e" stroke-width="6" stroke-linejoin="round"/>
+      <text x="1005" y="360" text-anchor="middle" font-size="30" font-weight="780" fill="#115e59">Web Search</text>
+      <text x="1005" y="398" text-anchor="middle" font-size="30" font-weight="780" fill="#115e59">Gateway</text>
+      <text x="1005" y="438" text-anchor="middle" font-size="19" fill="#627d98">认证、限流、错误语义</text>
+    </g>
+    <path d="M322 350H438" stroke="#0f766e" stroke-width="7" marker-end="url(#arrow)"/>
+    <path d="M748 350H864" stroke="#0f766e" stroke-width="7" marker-end="url(#arrow)"/>
+    <rect x="70" y="582" width="1060" height="290" rx="30" fill="#ecfeff" stroke="#67e8f9" stroke-width="3"/>
+    <text x="110" y="642" font-size="28" font-weight="780" fill="#155e75">服务端安全边界</text>
+    <g>
+      <rect x="112" y="694" width="270" height="112" rx="22" fill="#ffffff"/>
+      <text x="247" y="740" text-anchor="middle" font-size="24" font-weight="720" fill="#0c4a6e">多 Provider 搜索</text>
+      <text x="247" y="776" text-anchor="middle" font-size="18" fill="#627d98">自动回退与冷却</text>
+      <rect x="465" y="694" width="270" height="112" rx="22" fill="#ffffff"/>
+      <text x="600" y="740" text-anchor="middle" font-size="24" font-weight="720" fill="#0c4a6e">Camofox Browser</text>
+      <text x="600" y="776" text-anchor="middle" font-size="18" fill="#627d98">渲染与可读正文提取</text>
+      <rect x="818" y="694" width="270" height="112" rx="22" fill="#ffffff"/>
+      <text x="953" y="740" text-anchor="middle" font-size="24" font-weight="720" fill="#0c4a6e">隔离出口</text>
+      <text x="953" y="776" text-anchor="middle" font-size="18" fill="#627d98">SSRF 与私网访问防护</text>
+      <path d="M386 750h62M739 750h62" stroke="#0f766e" stroke-width="6" marker-end="url(#arrow)"/>
+    </g>
+    <text x="600" y="925" text-anchor="middle" font-size="22" font-weight="650" fill="#486581">公开互联网的文本始终按“不可信外部内容”返回给 Agent</text>
+  </g>
+</svg>
