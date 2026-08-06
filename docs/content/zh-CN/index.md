@@ -6,7 +6,7 @@ Camofox Web Search 是一个可自托管、只读的 Web Search 服务，可供 
 
 > GitHub Pages 只托管这份文档。真实服务需要部署在支持 Docker Compose 的 Linux 主机上。
 
-> 深度阅读：[《让 AI Agent 真正看见互联网：我们开源了 Camofox Web Search》](/zh-CN/article/)，了解 Agent Web Search 的完整能力、五种主流实现路线和项目设计取舍。
+> 深度阅读：[浏览文章目录](/zh-CN/articles/)，了解 Agent Web Search 的架构取舍，以及 OpenClaw、HermesAgent 的完整集成实战。
 
 ## 项目特色
 
@@ -122,8 +122,8 @@ Codex、Claude Code、OpenCode 与 Pi 也支持 project scope；OpenClaw 与 Her
 ## 原生 Agent 接入指南
 
 <div class="release-grid">
-<article><h3>OpenClaw</h3><p>安装原生 npm Provider、持久化 Gateway SecretRef、验证运行时注册、配置代理排除，并开始使用 web_search/web_fetch。</p><p><a href="/zh-CN/openclaw/">安装指南 →</a> · <a href="/zh-CN/openclaw-tutorial/">图文实战 →</a></p></article>
-<article><h3>HermesAgent</h3><p>安装到正确的 Hermes Python 环境、使用内置 uv、验证真实插件发现，并通过 Web Toolset 启动 TUI。</p><p><a href="/zh-CN/hermes/">安装指南 →</a> · <a href="/zh-CN/hermesagent-tutorial/">图文实战 →</a></p></article>
+<article><h3>OpenClaw</h3><p>安装原生 npm Provider、持久化 Gateway SecretRef、验证运行时注册、配置代理排除，并开始使用 web_search/web_fetch。</p><p><a href="/zh-CN/openclaw/">安装指南 →</a> · <a href="/zh-CN/articles/openclaw-camofox-web-search-guide/">图文实战 →</a></p></article>
+<article><h3>HermesAgent</h3><p>安装到正确的 Hermes Python 环境、使用内置 uv、验证真实插件发现，并通过 Web Toolset 启动 TUI。</p><p><a href="/zh-CN/hermes/">安装指南 →</a> · <a href="/zh-CN/articles/hermesagent-camofox-web-search-guide/">图文实战 →</a></p></article>
 </div>
 
 ## 安全边界

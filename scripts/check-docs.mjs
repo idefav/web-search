@@ -12,7 +12,14 @@ async function filesBelow(path) {
 }
 
 const htmlFiles = (await filesBelow(site)).filter((path) => path.endsWith(".html"));
-if (htmlFiles.length !== 16) throw new Error(`Expected 16 generated HTML pages, found ${htmlFiles.length}`);
+if (htmlFiles.length !== 20) throw new Error(`Expected 20 generated HTML pages, found ${htmlFiles.length}`);
+
+for (const required of [
+  "zh-CN/articles/index.html",
+  "zh-CN/articles/web-search-for-ai-agents/index.html",
+  "zh-CN/articles/openclaw-camofox-web-search-guide/index.html",
+  "zh-CN/articles/hermesagent-camofox-web-search-guide/index.html"
+]) await access(join(site, required));
 
 for (const path of htmlFiles) {
   const html = await readFile(path, "utf8");

@@ -1,6 +1,6 @@
 # Camofox Web Search
 
-[English](./README.md) · [简体中文](./README.zh-CN.md) · [Documentation](https://idefav.github.io/web-search/en/) · [Long-form article (中文)](https://idefav.github.io/web-search/zh-CN/article/)
+[English](./README.md) · [简体中文](./README.zh-CN.md) · [Documentation](https://idefav.github.io/web-search/en/) · [Articles (中文)](https://idefav.github.io/web-search/zh-CN/articles/)
 
 A self-hosted, remote-first Web Search service for Codex, Claude Code, OpenCode, Pi, OpenClaw, HermesAgent, and custom Agents. It wraps the pinned Camofox Browser REST API without maintaining a fork and exposes authenticated REST, stateless Streamable HTTP MCP, and native provider plugins.
 
@@ -173,7 +173,7 @@ openclaw tui
 
 The installer uses OpenClaw environment SecretRefs and does not write the token into `openclaw.json`. A Gateway managed by systemd or launchd must be able to read the key from `~/.openclaw/.env` or its service environment; an interactive-shell `export` alone is not persistent.
 
-Read the complete [OpenClaw installation, usage, proxy, verification, and uninstall guide](https://idefav.github.io/web-search/en/openclaw/). A detailed [Chinese visual tutorial](https://idefav.github.io/web-search/zh-CN/openclaw-tutorial/) walks through deployment, native-provider setup, live research, and five-layer verification. The [OpenClaw example](./examples/openclaw) also includes equivalent manual configuration.
+Read the complete [OpenClaw installation, usage, proxy, verification, and uninstall guide](https://idefav.github.io/web-search/en/openclaw/). A detailed [Chinese visual tutorial](https://idefav.github.io/web-search/zh-CN/articles/openclaw-camofox-web-search-guide/) walks through deployment, native-provider setup, live research, and five-layer verification. The [OpenClaw example](./examples/openclaw) also includes equivalent manual configuration.
 
 ## HermesAgent installation and usage
 
@@ -194,7 +194,7 @@ hermes -t web chat --tui
 
 The doctor performs Hermes' actual plugin discovery, so `PASS hermes-provider` proves that `camofox` was registered—not merely that the package appears in the plugin list. Set `HERMES_PYTHON` or pass `--hermes-python` for a custom installation.
 
-Read the complete [HermesAgent installation, usage, Python/uv troubleshooting, verification, and uninstall guide](https://idefav.github.io/web-search/en/hermes/). A detailed [Chinese visual tutorial](https://idefav.github.io/web-search/zh-CN/hermesagent-tutorial/) covers Python-provider discovery, live search/extraction, and five-layer verification. The [HermesAgent example](./examples/hermes) includes the manual PyPI path.
+Read the complete [HermesAgent installation, usage, Python/uv troubleshooting, verification, and uninstall guide](https://idefav.github.io/web-search/en/hermes/). A detailed [Chinese visual tutorial](https://idefav.github.io/web-search/zh-CN/articles/hermesagent-camofox-web-search-guide/) covers Python-provider discovery, live search/extraction, and five-layer verification. The [HermesAgent example](./examples/hermes) includes the manual PyPI path.
 
 ## API
 

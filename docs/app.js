@@ -3,6 +3,27 @@ for (const link of languageLinks) {
   link.addEventListener("click", () => localStorage.setItem("docs-language", link.dataset.language));
 }
 
+const navigationGroups = document.querySelectorAll(".nav-group");
+for (const group of navigationGroups) {
+  group.addEventListener("toggle", () => {
+    if (!group.open) return;
+    for (const other of navigationGroups) {
+      if (other !== group) other.removeAttribute("open");
+    }
+  });
+}
+
+document.addEventListener("click", (event) => {
+  for (const group of navigationGroups) {
+    if (!group.contains(event.target)) group.removeAttribute("open");
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  for (const group of navigationGroups) group.removeAttribute("open");
+});
+
 if (document.body.classList.contains("language-home")) {
   const saved = localStorage.getItem("docs-language");
   const language = saved ?? (navigator.language.toLowerCase().startsWith("zh") ? "zh-CN" : "en");

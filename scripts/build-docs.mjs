@@ -21,9 +21,11 @@ const languages = {
     openclawTutorial: "OpenClaw tutorial",
     hermes: "HermesAgent",
     hermesTutorial: "HermesAgent tutorial",
+    integrations: "Agent integrations",
     examples: "Examples",
     releases: "Releases",
-    article: "Article"
+    articles: "Articles",
+    article: "Why Web Search infrastructure"
   },
   "zh-CN": {
     label: "简体中文",
@@ -35,60 +37,107 @@ const languages = {
     openclawTutorial: "OpenClaw 实战",
     hermes: "HermesAgent 接入",
     hermesTutorial: "HermesAgent 实战",
+    integrations: "Agent 接入",
     examples: "示例",
     releases: "版本记录",
-    article: "深度文章"
+    articles: "文章目录",
+    article: "Agent Web Search 架构"
   }
 };
 
 const pages = [
-  { slug: "", file: "index.md", label: "project", title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
-  { slug: "deployment", file: "deployment.md", label: "deployment", title: { en: "Server deployment", "zh-CN": "服务端部署" } },
-  { slug: "openclaw", file: "openclaw.md", label: "openclaw", title: { en: "OpenClaw installation and usage", "zh-CN": "OpenClaw 安装与使用" } },
+  { slug: "", file: "index.md", label: "project", nav: true, title: { en: "Camofox Web Search", "zh-CN": "Camofox Web Search" } },
+  { slug: "deployment", file: "deployment.md", label: "deployment", nav: true, title: { en: "Server deployment", "zh-CN": "服务端部署" } },
+  { slug: "examples", file: "examples.md", label: "examples", group: "integrations", title: { en: "Examples", "zh-CN": "示例" } },
+  { slug: "openclaw", file: "openclaw.md", label: "openclaw", group: "integrations", title: { en: "OpenClaw installation and usage", "zh-CN": "OpenClaw 安装与使用" } },
+  { slug: "hermes", file: "hermes.md", label: "hermes", group: "integrations", title: { en: "HermesAgent installation and usage", "zh-CN": "HermesAgent 安装与使用" } },
+  { slug: "releases", file: "releases.md", label: "releases", nav: true, title: { en: "Release notes", "zh-CN": "版本记录" } },
   {
-    slug: "openclaw-tutorial",
+    slug: "articles",
+    file: "articles.md",
+    label: "articles",
+    group: "articles",
+    languages: ["zh-CN"],
+    title: { "zh-CN": "文章" }
+  },
+  {
+    slug: "articles/openclaw-camofox-web-search-guide",
     source: join(root, "articles", "openclaw-camofox-web-search-guide.md"),
     label: "openclawTutorial",
+    group: "articles",
     languages: ["zh-CN"],
     title: { "zh-CN": "给 OpenClaw 装上真正可控的 Web Search" }
   },
-  { slug: "hermes", file: "hermes.md", label: "hermes", title: { en: "HermesAgent installation and usage", "zh-CN": "HermesAgent 安装与使用" } },
   {
-    slug: "hermesagent-tutorial",
+    slug: "articles/hermesagent-camofox-web-search-guide",
     source: join(root, "articles", "hermesagent-camofox-web-search-guide.md"),
     label: "hermesTutorial",
+    group: "articles",
     languages: ["zh-CN"],
     title: { "zh-CN": "让 HermesAgent 拥有真正可控的 Web Search" }
   },
-  { slug: "examples", file: "examples.md", label: "examples", title: { en: "Examples", "zh-CN": "示例" } },
-  { slug: "releases", file: "releases.md", label: "releases", title: { en: "Release notes", "zh-CN": "版本记录" } },
   {
-    slug: "article",
+    slug: "articles/web-search-for-ai-agents",
     source: join(root, "articles", "web-search-for-ai-agents.md"),
     label: "article",
+    group: "articles",
     languages: ["zh-CN"],
     title: { "zh-CN": "让 AI Agent 真正看见互联网" }
   }
 ];
 
+const navigationGroups = {
+  integrations: ["examples", "openclaw", "hermes"],
+  articles: [
+    "articles",
+    "articles/web-search-for-ai-agents",
+    "articles/openclaw-camofox-web-search-guide",
+    "articles/hermesagent-camofox-web-search-guide"
+  ]
+};
+
+const legacyRedirects = {
+  "zh-CN": {
+    article: "articles/web-search-for-ai-agents",
+    "openclaw-tutorial": "articles/openclaw-camofox-web-search-guide",
+    "hermesagent-tutorial": "articles/hermesagent-camofox-web-search-guide"
+  }
+};
+
+function rootPrefix(slug) {
+  return "../".repeat(slug.split("/").filter(Boolean).length + 1);
+}
+
 function pageUrl(language, slug, current) {
-  const rootPrefix = current ? "../../" : "../";
-  return `${rootPrefix}${language}/${slug ? `${slug}/` : ""}`;
+  return `${rootPrefix(current)}${language}/${slug ? `${slug}/` : ""}`;
+}
+
+function pageLink(page, language, current) {
+  const label = languages[language][page.label];
+  const active = page.slug === current ? " aria-current=\"page\"" : "";
+  return `<a href="${pageUrl(language, page.slug, current)}"${active}>${label}</a>`;
 }
 
 function navigation(language, current) {
   const labels = languages[language];
-  const links = pages.filter((page) => !page.languages || page.languages.includes(language)).map((page) => {
-    const label = labels[page.label];
-    const active = page.slug === current ? " aria-current=\"page\"" : "";
-    return `<a href="${pageUrl(language, page.slug, current)}"${active}>${label}</a>`;
-  }).join("");
+  const availablePages = pages.filter((page) => !page.languages || page.languages.includes(language));
+  const directLinks = availablePages.filter((page) => page.nav).map((page) => pageLink(page, language, current));
+  const groups = Object.entries(navigationGroups).flatMap(([group, slugs]) => {
+    const groupPages = slugs
+      .map((slug) => availablePages.find((page) => page.slug === slug))
+      .filter(Boolean);
+    if (groupPages.length === 0) return [];
+    const active = groupPages.some((page) => page.slug === current) ? " active" : "";
+    const links = groupPages.map((page) => pageLink(page, language, current)).join("");
+    return `<details class="nav-group${active}"><summary>${labels[group]}</summary><div class="nav-menu">${links}</div></details>`;
+  });
   const alternatePage = pages.find((page) => page.slug === current && (!page.languages || page.languages.includes(labels.alternateCode)));
-  return `${links}<a class="language-link" href="${pageUrl(labels.alternateCode, alternatePage ? current : "", current)}" data-language="${labels.alternateCode}">${labels.alternate}</a>`;
+  const languageLink = `<a class="language-link" href="${pageUrl(labels.alternateCode, alternatePage ? current : "", current)}" data-language="${labels.alternateCode}">${labels.alternate}</a>`;
+  return `${directLinks.slice(0, 2).join("")}${groups.join("")}${directLinks.slice(2).join("")}${languageLink}`;
 }
 
 function renderTemplate({ language, slug, title, content }) {
-  const rootPrefix = slug ? "../../" : "../";
+  const prefix = rootPrefix(slug);
   const documentTitle = title === "Camofox Web Search" ? title : `${title} · Camofox Web Search`;
   return template
     .replaceAll("{{lang}}", language)
@@ -97,7 +146,7 @@ function renderTemplate({ language, slug, title, content }) {
     .replaceAll("{{description}}", language === "zh-CN" ? "自托管的 Web Search 服务端部署与 Agent 接入文档" : "Self-hosted Web Search deployment and Agent integration documentation")
     .replaceAll("{{navigation}}", navigation(language, slug))
     .replaceAll("{{content}}", content)
-    .replaceAll("{{root}}", rootPrefix)
+    .replaceAll("{{root}}", prefix)
     .replaceAll("{{version}}", version);
 }
 
@@ -109,18 +158,31 @@ for (const language of Object.keys(languages)) {
     if (page.languages && !page.languages.includes(language)) continue;
     const markdownPath = page.source ?? join(source, "content", language, page.file);
     let markdown = (await readFile(markdownPath, "utf8")).replaceAll("{{version}}", version);
+    const prefix = rootPrefix(page.slug);
     if (page.source) {
       markdown = markdown
-        .replaceAll("(./assets/", "(../../articles/assets/")
-        .replaceAll("(../docs/content/zh-CN/deployment.md)", "(../deployment/)")
-        .replaceAll("(../docs/content/zh-CN/examples.md)", "(../examples/)")
+        .replaceAll("(./assets/", `(${prefix}articles/assets/`)
+        .replaceAll("(../docs/content/zh-CN/deployment.md)", `(${prefix}zh-CN/deployment/)`)
+        .replaceAll("(../docs/content/zh-CN/examples.md)", `(${prefix}zh-CN/examples/)`)
         .replaceAll("(../README.zh-CN.md)", "(https://github.com/idefav/web-search/blob/main/README.zh-CN.md)");
     }
-    const rootPrefix = page.slug ? "../../" : "../";
-    const content = (await marked.parse(markdown, { gfm: true })).replaceAll('href="/', `href="${rootPrefix}`);
+    if (page.source) {
+      markdown = `<div class="breadcrumbs"><a href="${prefix}${language}/articles/">文章</a><span aria-hidden="true">/</span><span>${page.title[language]}</span></div>\n\n${markdown}`;
+    }
+    const content = (await marked.parse(markdown, { gfm: true })).replaceAll('href="/', `href="${prefix}`);
     const target = join(output, language, page.slug, "index.html");
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, renderTemplate({ language, slug: page.slug, title: page.title[language], content }));
+  }
+}
+
+for (const [language, redirects] of Object.entries(legacyRedirects)) {
+  for (const [from, to] of Object.entries(redirects)) {
+    const target = join(output, language, from, "index.html");
+    const destination = `../${to}/`;
+    const html = `<!doctype html><html lang="${language}"><head><meta charset="utf-8"><meta name="robots" content="noindex"><link rel="canonical" href="${destination}"><meta http-equiv="refresh" content="0;url=${destination}"><title>Moved · Camofox Web Search</title></head><body><p><a href="${destination}">This page has moved.</a></p></body></html>`;
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, html);
   }
 }
 
